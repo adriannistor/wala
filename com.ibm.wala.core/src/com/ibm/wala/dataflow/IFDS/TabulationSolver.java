@@ -82,7 +82,7 @@ public class TabulationSolver<T, P, F> {
   /**
    * Should we periodically clear out soft reference caches in an attempt to help the GC?
    */
-  final protected static boolean PERIODIC_WIPE_SOFT_CACHES = true;
+  final protected static boolean PERIODIC_WIPE_SOFT_CACHES = false;
 
   /**
    * Interval which defines the period to clear soft reference caches

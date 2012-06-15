@@ -1,3 +1,13 @@
+/*******************************************************************************
+ * Copyright (c) 2002 - 2006 IBM Corporation.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+ *******************************************************************************/
 package com.ibm.wala.cast.js.rhino.test;
 
 import java.io.File;
@@ -20,13 +30,13 @@ import com.ibm.wala.cast.js.ipa.callgraph.correlations.extraction.CorrelatedPair
 import com.ibm.wala.cast.js.test.JSCallGraphBuilderUtil;
 import com.ibm.wala.cast.js.test.JSCallGraphBuilderUtil.CGBuilderType;
 import com.ibm.wala.cast.js.translator.CAstRhinoTranslatorFactory;
+import com.ibm.wala.ide.util.ProgressMaster;
+import com.ibm.wala.ide.util.ProgressMonitorDelegate;
 import com.ibm.wala.ipa.callgraph.CGNode;
 import com.ibm.wala.ipa.callgraph.CallGraph;
 import com.ibm.wala.ipa.callgraph.CallGraphBuilderCancelException;
 import com.ibm.wala.ipa.callgraph.propagation.PointerAnalysis;
 import com.ibm.wala.ipa.cha.ClassHierarchyException;
-import com.ibm.wala.util.ProgressMaster;
-import com.ibm.wala.util.ProgressMonitorDelegate;
 import com.ibm.wala.util.io.CommandLine;
 import com.ibm.wala.util.io.FileProvider;
 
@@ -125,7 +135,7 @@ public class HTMLCGBuilder {
 		// first try interpreting as local file name, if that doesn't work just
 		// assume it's a URL
 		try {
-			File f = FileProvider.getFileFromClassLoader(src, HTMLCGBuilder.class.getClassLoader());
+			File f = (new FileProvider()).getFileFromClassLoader(src, HTMLCGBuilder.class.getClassLoader());
 			URL url = f.toURI().toURL();
 			return url;
 		} catch (FileNotFoundException fnfe) {

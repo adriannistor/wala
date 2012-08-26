@@ -13,3 +13,5 @@ com.ibm.wala.cast.js.html.nu_validator/lib/
 com.ibm.wala.cast.java.test/testdata/
 
 .DS_Store
+
+target/

@@ -1,7 +1,9 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
-	<classpathentry kind="src" path="src"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/J2SE-1.5"/>
-	<classpathentry kind="output" path="bin"/>
+  <classpathentry output="target/classes" path="src/scala" kind="src"></classpathentry>
+  <classpathentry output="target/classes" path="src/java" kind="src"></classpathentry>
+  <classpathentry output="target/test-classes" path="test/scala" kind="src"></classpathentry>
+  <classpathentry output="target/test-classes" path="test/java" kind="src"></classpathentry>
+  <classpathentry exported="true" path="/walaUtil" kind="src" combineaccessrules="false"></classpathentry>
+  <classpathentry path="org.eclipse.jdt.launching.JRE_CONTAINER" kind="con"></classpathentry>
+  <classpathentry path="bin" kind="output"></classpathentry>
 </classpath>

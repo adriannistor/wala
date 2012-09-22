@@ -13,7 +13,7 @@ package com.ibm.wala.dataflow.IFDS;
 import java.util.Collection;
 import java.util.Iterator;
 
-import com.ibm.wala.util.MonitorUtil.IProgressMonitor;
+import com.ibm.wala.util.IProgressMonitor;
 import com.ibm.wala.util.collections.HashSetFactory;
 import com.ibm.wala.util.collections.Pair;
 import com.ibm.wala.util.debug.Assertions;

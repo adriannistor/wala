@@ -17,20 +17,6 @@ package com.ibm.wala.util;
  */
 public class MonitorUtil {
   
-  /**
-   * Use this interface to decouple core utilities from the Eclipse layer
-   */
-  public interface IProgressMonitor {
-
-    void beginTask(String task, int totalWork);
-
-    boolean isCanceled();
-
-    void done();
-
-    void worked(int units);
-  }
-
   public static void beginTask(IProgressMonitor monitor, String task, int totalWork) throws CancelException {
     if (monitor != null) {
       monitor.beginTask(task, totalWork);

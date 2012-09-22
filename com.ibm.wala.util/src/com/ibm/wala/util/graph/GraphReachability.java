@@ -23,7 +23,7 @@ import com.ibm.wala.dataflow.graph.ITransferFunctionProvider;
 import com.ibm.wala.fixpoint.BitVectorVariable;
 import com.ibm.wala.fixpoint.UnaryOperator;
 import com.ibm.wala.util.CancelException;
-import com.ibm.wala.util.MonitorUtil.IProgressMonitor;
+import com.ibm.wala.util.IProgressMonitor;
 import com.ibm.wala.util.collections.Filter;
 import com.ibm.wala.util.collections.FilterIterator;
 import com.ibm.wala.util.collections.Iterator2Collection;

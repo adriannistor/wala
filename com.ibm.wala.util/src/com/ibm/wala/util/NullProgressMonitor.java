@@ -10,8 +10,6 @@
  *******************************************************************************/
 package com.ibm.wala.util;
 
-import com.ibm.wala.util.MonitorUtil.IProgressMonitor;
-
 /**
  * Dummy {@link IProgressMonitor} 
  */

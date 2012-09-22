@@ -50,7 +50,7 @@ import com.ibm.wala.ssa.SymbolTable;
 import com.ibm.wala.types.TypeReference;
 import com.ibm.wala.util.CancelException;
 import com.ibm.wala.util.CancelRuntimeException;
-import com.ibm.wala.util.MonitorUtil.IProgressMonitor;
+import com.ibm.wala.util.IProgressMonitor;
 import com.ibm.wala.util.debug.Assertions;
 
 /**

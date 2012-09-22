@@ -23,7 +23,7 @@ import com.ibm.wala.fixpoint.UnaryOperator;
 import com.ibm.wala.fixpoint.UnaryStatement;
 import com.ibm.wala.util.CancelException;
 import com.ibm.wala.util.MonitorUtil;
-import com.ibm.wala.util.MonitorUtil.IProgressMonitor;
+import com.ibm.wala.util.IProgressMonitor;
 import com.ibm.wala.util.debug.VerboseAction;
 
 /**

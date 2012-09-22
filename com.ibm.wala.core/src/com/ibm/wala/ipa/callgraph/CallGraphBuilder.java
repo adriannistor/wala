@@ -12,7 +12,7 @@ package com.ibm.wala.ipa.callgraph;
 
 
 import com.ibm.wala.ipa.callgraph.propagation.PointerAnalysis;
-import com.ibm.wala.util.MonitorUtil.IProgressMonitor;
+import com.ibm.wala.util.IProgressMonitor;
 
 /**
  * Basic interface for an object that can build a call graph.

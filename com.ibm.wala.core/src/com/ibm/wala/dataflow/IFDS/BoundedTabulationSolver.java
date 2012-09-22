@@ -10,7 +10,7 @@
  *******************************************************************************/
 package com.ibm.wala.dataflow.IFDS;
 
-import com.ibm.wala.util.MonitorUtil.IProgressMonitor;
+import com.ibm.wala.util.IProgressMonitor;
 
 
 

@@ -30,7 +30,7 @@ import com.ibm.wala.ipa.slicer.Statement.Kind;
 import com.ibm.wala.ssa.SSACheckCastInstruction;
 import com.ibm.wala.types.TypeReference;
 import com.ibm.wala.util.CancelException;
-import com.ibm.wala.util.MonitorUtil.IProgressMonitor;
+import com.ibm.wala.util.IProgressMonitor;
 import com.ibm.wala.util.Predicate;
 import com.ibm.wala.util.collections.HashSetFactory;
 

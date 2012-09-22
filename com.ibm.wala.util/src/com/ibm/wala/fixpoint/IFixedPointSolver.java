@@ -13,7 +13,7 @@ package com.ibm.wala.fixpoint;
 
 
 import com.ibm.wala.util.CancelException;
-import com.ibm.wala.util.MonitorUtil.IProgressMonitor;
+import com.ibm.wala.util.IProgressMonitor;
 
 /**
  * Solves a set of constraints

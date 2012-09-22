@@ -12,7 +12,7 @@ package com.ibm.wala.ipa.callgraph.propagation;
 
 
 import com.ibm.wala.util.CancelException;
-import com.ibm.wala.util.MonitorUtil.IProgressMonitor;
+import com.ibm.wala.util.IProgressMonitor;
 
 /**
  * standard fixed-point iterative solver for pointer analysis

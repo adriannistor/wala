@@ -27,9 +27,10 @@ import java.util.jar.JarFile;
 
 import org.junit.Assert;
 
-import com.ibm.wala.cast.ir.translator.AstTranslator;
 import com.ibm.wala.cast.java.client.JavaSourceAnalysisEngine;
 import com.ibm.wala.cast.java.ipa.callgraph.JavaSourceAnalysisScope;
+import com.ibm.wala.cast.loader.AstClass;
+import com.ibm.wala.cast.loader.AstMethod;
 import com.ibm.wala.classLoader.IClass;
 import com.ibm.wala.classLoader.IClassLoader;
 import com.ibm.wala.classLoader.IMethod;
@@ -37,6 +38,7 @@ import com.ibm.wala.classLoader.JarFileModule;
 import com.ibm.wala.classLoader.Language;
 import com.ibm.wala.classLoader.SourceDirectoryTreeModule;
 import com.ibm.wala.classLoader.SourceFileModule;
+import com.ibm.wala.client.AbstractAnalysisEngine;
 import com.ibm.wala.ipa.callgraph.CGNode;
 import com.ibm.wala.ipa.callgraph.CallGraph;
 import com.ibm.wala.ipa.cha.IClassHierarchy;
@@ -47,6 +49,7 @@ import com.ibm.wala.types.ClassLoaderReference;
 import com.ibm.wala.types.MethodReference;
 import com.ibm.wala.types.TypeName;
 import com.ibm.wala.types.TypeReference;
+import com.ibm.wala.util.CancelException;
 import com.ibm.wala.util.collections.HashSetFactory;
 import com.ibm.wala.util.collections.Pair;
 import com.ibm.wala.util.debug.Assertions;
@@ -111,7 +114,7 @@ public abstract class IRTests {
 
   public interface IRAssertion {
 
-    void check(CallGraph cg) throws Exception;
+    void check(CallGraph cg);
 
   }
 
@@ -278,41 +281,46 @@ public abstract class IRTests {
     return new String[] { "L" + pkgName + "/" + getTestName().substring(4) };
   }
 
-  protected abstract JavaSourceAnalysisEngine getAnalysisEngine(String[] mainClassDescriptors);
+  protected abstract AbstractAnalysisEngine getAnalysisEngine(String[] mainClassDescriptors, Collection<String> sources, List<String> libs);
 
   public Pair runTest(Collection<String> sources, List<String> libs, String[] mainClassDescriptors, List<? extends IRAssertion> ca,
       boolean assertReachable) {
-    try {
-      boolean currentState = AstTranslator.NEW_LEXICAL;
-      AstTranslator.NEW_LEXICAL = false;
-      
-      JavaSourceAnalysisEngine engine = getAnalysisEngine(mainClassDescriptors);
+      AbstractAnalysisEngine engine = getAnalysisEngine(mainClassDescriptors, sources, libs);
 
-      populateScope(engine, sources, libs);
+      CallGraph callGraph;
+      try {
+        callGraph = engine.buildDefaultCallGraph();
+        System.err.println(callGraph.toString());
 
-      CallGraph callGraph = engine.buildDefaultCallGraph();
-      System.err.println(callGraph.toString());
+        // If we've gotten this far, IR has been produced.
+        dumpIR(callGraph, sources, assertReachable);
 
-      // If we've gotten this far, IR has been produced.
-      dumpIR(callGraph, assertReachable);
+        // Now check any assertions as to source mapping
+        for (IRAssertion IRAssertion : ca) {
+          IRAssertion.check(callGraph);
+        }
 
-      // Now check any assertions as to source mapping
-      for (IRAssertion IRAssertion : ca) {
-        IRAssertion.check(callGraph);
+        return Pair.make(callGraph, engine.getPointerAnalysis());
+      } catch (IllegalArgumentException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      } catch (CancelException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      } catch (IOException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
       }
 
-      AstTranslator.NEW_LEXICAL = currentState;
-
-      return Pair.make(callGraph, engine.getPointerAnalysis());
-
-    } catch (Exception e) {
-      e.printStackTrace();
-      Assert.assertTrue(e.toString(), false);
       return null;
-    }
-  }
+}
 
-  protected static void dumpIR(CallGraph cg, boolean assertReachable) throws IOException {
+  protected static void dumpIR(CallGraph cg, Collection<String> sources, boolean assertReachable) throws IOException {
+    Set<String> sourcePaths = HashSetFactory.make();
+    for(String src : sources) {
+      sourcePaths.add(src.substring(src.lastIndexOf(File.separator)+1));
+    }
+    
     Set<IMethod> unreachable = HashSetFactory.make();
     IClassHierarchy cha = cg.getClassHierarchy();
     IClassLoader sourceLoader = cha.getLoader(JavaSourceAnalysisScope.SOURCE);
@@ -329,8 +337,13 @@ public abstract class IRTests {
         } else {
           Iterator nodeIter = cg.getNodes(m.getReference()).iterator();
           if (!nodeIter.hasNext()) {
-            System.err.println(("Method " + m.getReference() + " not reachable?"));
-            unreachable.add(m);
+            if (m instanceof AstMethod) {
+              String fn = ((AstClass)m.getDeclaringClass()).getSourcePosition().getURL().getFile();
+              if (sourcePaths.contains(fn.substring(fn.lastIndexOf(File.separator)+1))) {
+                System.err.println(("Method " + m.getReference() + " not reachable?"));
+                unreachable.add(m);
+              }
+            }
             continue;
           }
           CGNode node = (CGNode) nodeIter.next();
@@ -384,13 +397,17 @@ public abstract class IRTests {
     return null;
   }
 
-  protected void populateScope(JavaSourceAnalysisEngine engine, Collection<String> sources, List<String> libs) throws IOException {
+  protected void populateScope(JavaSourceAnalysisEngine engine, Collection<String> sources, List<String> libs) {
     boolean foundLib = false;
     for (String lib : libs) {
       File libFile = new File(lib);
       if (libFile.exists()) {
         foundLib = true;
-        engine.addSystemModule(new JarFileModule(new JarFile(libFile)));
+        try {
+          engine.addSystemModule(new JarFileModule(new JarFile(libFile)));
+        } catch (IOException e) {
+          Assert.fail(e.getMessage());
+        }
       }
     }
     assert foundLib : "couldn't find library file from " + libs;

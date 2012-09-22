@@ -18,7 +18,6 @@ import org.junit.Test;
 
 import com.ibm.wala.cast.js.html.IHtmlParser;
 import com.ibm.wala.cast.js.html.IHtmlParserFactory;
-import com.ibm.wala.cast.js.html.JSSourceExtractor;
 import com.ibm.wala.cast.js.html.WebUtil;
 import com.ibm.wala.cast.js.ipa.callgraph.JSCFABuilder;
 import com.ibm.wala.ipa.callgraph.CallGraph;
@@ -40,20 +39,14 @@ public abstract class TestSimplePageCallGraphShape extends TestJSCallGraphShape 
       }
     });
   }
-
-  @Before
-  public void config() {
-    JSSourceExtractor.USE_TEMP_NAME = false;
-    JSSourceExtractor.DELETE_UPON_EXIT = true;
-  }
   
   private static final Object[][] assertionsForPage1 = new Object[][] {
     new Object[] { ROOT, new String[] { "page1.html" } },
     new Object[] { "page1.html", new String[] { "page1.html/__WINDOW_MAIN__" } },
     new Object[] { "page1.html/__WINDOW_MAIN__",
-        new String[] { "prologue.js/substring",
-                       "prologue.js/indexOf",
-                       "preamble.js/DOMDocument/write_to_dom",
+        new String[] { "prologue.js/String_prototype_substring",
+                       "prologue.js/String_prototype_indexOf",
+                       "preamble.js/DOMDocument/Document_prototype_write",
                        "prologue.js/encodeURI"
         }
     }
@@ -80,9 +73,9 @@ public abstract class TestSimplePageCallGraphShape extends TestJSCallGraphShape 
     new Object[] { ROOT, new String[] { "page11.html" } },
     new Object[] { "page11.html", new String[] { "page11.html/__WINDOW_MAIN__" } },
     new Object[] { "page11.html/__WINDOW_MAIN__",
-        new String[] { "preamble.js/DOMDocument/createElement",
-                       "preamble.js/DOMNode/appendChild",
-                       "preamble.js/DOMElement/setAttribute"
+        new String[] { "preamble.js/DOMDocument/Document_prototype_createElement",
+                       "preamble.js/DOMNode/Node_prototype_appendChild",
+                       "preamble.js/DOMElement/Element_prototype_setAttribute"
         }
     }
   };
@@ -97,9 +90,9 @@ public abstract class TestSimplePageCallGraphShape extends TestJSCallGraphShape 
     new Object[] { ROOT, new String[] { "page11b.html" } },
     new Object[] { "page11b.html", new String[] { "page11b.html/__WINDOW_MAIN__" } },
     new Object[] { "page11b.html/__WINDOW_MAIN__",
-        new String[] { "preamble.js/DOMDocument/createElement",
-                       "preamble.js/DOMNode/appendChild",
-                       "preamble.js/DOMElement/setAttribute"
+        new String[] { "preamble.js/DOMDocument/Document_prototype_createElement",
+                       "preamble.js/DOMNode/Node_prototype_appendChild",
+                       "preamble.js/DOMElement/Element_prototype_setAttribute"
         }
     }
   };
@@ -120,18 +113,18 @@ public abstract class TestSimplePageCallGraphShape extends TestJSCallGraphShape 
         }
     },
     new Object[]{ "page12.html/__WINDOW_MAIN__/callXHR",
-        new String[] { "preamble.js/DOMDocument/getElementById",
-                       "preamble.js/_XMLHttpRequest/xhr_open",
-                       "preamble.js/_XMLHttpRequest/xhr_send"
+        new String[] { "preamble.js/DOMDocument/Document_prototype_getElementById",
+                       "preamble.js/XMLHttpRequest/xhr_open",
+                       "preamble.js/XMLHttpRequest/xhr_send"
         }
     },
-    new Object[]{ "preamble.js/_XMLHttpRequest/xhr_open",
-        new String[] { "preamble.js/_XMLHttpRequest/xhr_orsc_handler" }
+    new Object[]{ "preamble.js/XMLHttpRequest/xhr_open",
+        new String[] { "preamble.js/XMLHttpRequest/xhr_orsc_handler" }
     },
-    new Object[]{ "preamble.js/_XMLHttpRequest/xhr_send",
-        new String[] { "preamble.js/_XMLHttpRequest/xhr_orsc_handler" }
+    new Object[]{ "preamble.js/XMLHttpRequest/xhr_send",
+        new String[] { "preamble.js/XMLHttpRequest/xhr_orsc_handler" }
     },
-    new Object[]{ "preamble.js/_XMLHttpRequest/xhr_orsc_handler",
+    new Object[]{ "preamble.js/XMLHttpRequest/xhr_orsc_handler",
         new String[] { "page12.html/__WINDOW_MAIN__/handler" }
     },
   };
@@ -152,19 +145,19 @@ public abstract class TestSimplePageCallGraphShape extends TestJSCallGraphShape 
         }
     },
     new Object[]{ "page13.html/__WINDOW_MAIN__/callXHR",
-        new String[] { "preamble.js/DOMDocument/getElementById",
-                       "preamble.js/_XMLHttpRequest/xhr_open",
-                       "preamble.js/_XMLHttpRequest/xhr_setRequestHeader",
-                       "preamble.js/_XMLHttpRequest/xhr_send"
+        new String[] { "preamble.js/DOMDocument/Document_prototype_getElementById",
+                       "preamble.js/XMLHttpRequest/xhr_open",
+                       "preamble.js/XMLHttpRequest/xhr_setRequestHeader",
+                       "preamble.js/XMLHttpRequest/xhr_send"
         }
     },
-    new Object[]{ "preamble.js/_XMLHttpRequest/xhr_open",
-        new String[] { "preamble.js/_XMLHttpRequest/xhr_orsc_handler" }
+    new Object[]{ "preamble.js/XMLHttpRequest/xhr_open",
+        new String[] { "preamble.js/XMLHttpRequest/xhr_orsc_handler" }
     },
-    new Object[]{ "preamble.js/_XMLHttpRequest/xhr_send",
-        new String[] { "preamble.js/_XMLHttpRequest/xhr_orsc_handler" }
+    new Object[]{ "preamble.js/XMLHttpRequest/xhr_send",
+        new String[] { "preamble.js/XMLHttpRequest/xhr_orsc_handler" }
     },
-    new Object[]{ "preamble.js/_XMLHttpRequest/xhr_orsc_handler",
+    new Object[]{ "preamble.js/XMLHttpRequest/xhr_orsc_handler",
         new String[] { "page13.html/__WINDOW_MAIN__/handler" }
     }
   };
@@ -272,7 +265,7 @@ public abstract class TestSimplePageCallGraphShape extends TestJSCallGraphShape 
     URL url = getClass().getClassLoader().getResource("pages/list.html");
     JSCFABuilder builder = JSCallGraphBuilderUtil.makeHTMLCGBuilder(url);
     CallGraph CG = builder.makeCallGraph(builder.getOptions());
-    JSCallGraphBuilderUtil.AVOID_DUMP = false;
+//    JSCallGraphBuilderUtil.AVOID_DUMP = false;
     JSCallGraphBuilderUtil.dumpCG(builder.getPointerAnalysis(), CG);
     verifySourceAssertions(CG, sourceAssertionsForList);
   }

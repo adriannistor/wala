@@ -13,7 +13,7 @@ javaSource in Test <<= baseDirectory(_ / "test")
 
 scalaSource in Test <<= baseDirectory(_ / "test")
 
-resourceDirectory in Compile <<= baseDirectory(_ / "resources")
+resourceDirectory in Compile <<= baseDirectory(_ / "dat")
 
 EclipseKeys.projectFlavor := EclipseProjectFlavor.Java
 

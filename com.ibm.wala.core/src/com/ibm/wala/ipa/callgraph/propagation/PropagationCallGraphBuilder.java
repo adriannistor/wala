@@ -89,7 +89,7 @@ public abstract class PropagationCallGraphBuilder implements CallGraphBuilder {
   /**
    * Governing class hierarchy
    */
-  final protected IClassHierarchy cha;
+  final public IClassHierarchy cha;
 
   /**
    * Special rules for bypassing Java calls
@@ -129,7 +129,7 @@ public abstract class PropagationCallGraphBuilder implements CallGraphBuilder {
   /**
    * The call graph under construction
    */
-  protected final ExplicitCallGraph callGraph;
+  public final ExplicitCallGraph callGraph;
 
   /**
    * Singleton operator for assignments

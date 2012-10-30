@@ -104,7 +104,9 @@ public class PointerAnalysisImpl extends AbstractPointerAnalysis {
   }
 
   /*
-   * @see com.ibm.wala.ipa.callgraph.propagation.PointerAnalysis#getPointsToSet(com.ibm.wala.ipa.callgraph.propagation.PointerKey)
+   * @see
+   * com.ibm.wala.ipa.callgraph.propagation.PointerAnalysis#getPointsToSet(com
+   * .ibm.wala.ipa.callgraph.propagation.PointerKey)
    */
   @SuppressWarnings("unchecked")
   public OrdinalSet<InstanceKey> getPointsToSet(PointerKey key) {
@@ -138,7 +140,8 @@ public class PointerAnalysisImpl extends AbstractPointerAnalysis {
   }
 
   /**
-   * did the pointer analysis use a type filter for a given points-to set? (this is ugly).
+   * did the pointer analysis use a type filter for a given points-to set? (this
+   * is ugly).
    */
   public boolean isFiltered(PointerKey key) {
     if (pointsToMap.isImplicit(key)) {
@@ -220,8 +223,8 @@ public class PointerAnalysisImpl extends AbstractPointerAnalysis {
       DefUse du = node.getDU();
       if (((SSAPropagationCallGraphBuilder) builder).contentsAreInvariant(ir.getSymbolTable(), du, lpk.getValueNumber())) {
         // cons up the points-to set for invariant contents
-        InstanceKey[] ik = ((SSAPropagationCallGraphBuilder) builder).getInvariantContents(ir.getSymbolTable(), du, node, lpk
-            .getValueNumber(), H, true);
+        InstanceKey[] ik = ((SSAPropagationCallGraphBuilder) builder).getInvariantContents(ir.getSymbolTable(), du, node,
+            lpk.getValueNumber(), H, true);
         return toOrdinalSet(ik);
       } else {
         SSAInstruction def = du.getDef(lpk.getValueNumber());
@@ -325,52 +328,59 @@ public class PointerAnalysisImpl extends AbstractPointerAnalysis {
   }
 
   private OrdinalSet<InstanceKey> computeImplicitPointsToSetAtCatch(CGNode node, SSAGetCaughtExceptionInstruction instruction) {
-    IR ir = node.getIR();
-    List<ProgramCounter> peis = SSAPropagationCallGraphBuilder.getIncomingPEIs(ir, ir.getBasicBlockForCatch(instruction));
-    Set<IClass> caughtTypes = SSAPropagationCallGraphBuilder.getCaughtExceptionTypes(instruction, ir);
+    // IR ir = node.getIR();
+    // List<ProgramCounter> peis =
+    // SSAPropagationCallGraphBuilder.getIncomingPEIs(ir,
+    // ir.getBasicBlockForCatch(instruction));
+    // Set<IClass> caughtTypes =
+    // SSAPropagationCallGraphBuilder.getCaughtExceptionTypes(instruction, ir);
     MutableSparseIntSet S = MutableSparseIntSet.makeEmpty();
-    // add the instances from each incoming pei ...
-    for (Iterator<ProgramCounter> it = peis.iterator(); it.hasNext();) {
-      ProgramCounter peiLoc = it.next();
-      SSAInstruction pei = ir.getPEI(peiLoc);
-      PointerKey e = null;
-      // first deal with exception variables from calls and throws.
-      if (pei instanceof SSAAbstractInvokeInstruction) {
-        SSAAbstractInvokeInstruction s = (SSAAbstractInvokeInstruction) pei;
-        e = pointerKeys.getPointerKeyForLocal(node, s.getException());
-      } else if (pei instanceof SSAThrowInstruction) {
-        SSAThrowInstruction s = (SSAThrowInstruction) pei;
-        e = pointerKeys.getPointerKeyForLocal(node, s.getException());
-      }
-      if (e != null) {
-        OrdinalSet ep = getPointsToSet(e);
-        for (Iterator it2 = ep.iterator(); it2.hasNext();) {
-          InstanceKey ik = (InstanceKey) it2.next();
-          if (PropagationCallGraphBuilder.catches(caughtTypes, ik.getConcreteType(), getCallGraph().getClassHierarchy())) {
-            S.add(instanceKeys.getMappedIndex(ik));
-          }
-        }
-      }
-
-      // Account for those exceptions for which we do not actually have a
-      // points-to set for
-      // the pei, but just instance keys
-      Collection types = pei.getExceptionTypes();
-      if (types != null) {
-        for (Iterator it2 = types.iterator(); it2.hasNext();) {
-          TypeReference type = (TypeReference) it2.next();
-          if (type != null) {
-            InstanceKey ik = SSAPropagationCallGraphBuilder.getInstanceKeyForPEI(node, peiLoc, type, iKeyFactory);
-            ConcreteTypeKey ck = (ConcreteTypeKey) ik;
-            IClass klass = ck.getType();
-            if (PropagationCallGraphBuilder.catches(caughtTypes, klass, getCallGraph().getClassHierarchy())) {
-              S.add(instanceKeys.getMappedIndex(SSAPropagationCallGraphBuilder
-                  .getInstanceKeyForPEI(node, peiLoc, type, iKeyFactory)));
-            }
-          }
-        }
-      }
-    }
+    // // add the instances from each incoming pei ...
+    // for (Iterator<ProgramCounter> it = peis.iterator(); it.hasNext();) {
+    // ProgramCounter peiLoc = it.next();
+    // SSAInstruction pei = ir.getPEI(peiLoc);
+    // PointerKey e = null;
+    // // first deal with exception variables from calls and throws.
+    // if (pei instanceof SSAAbstractInvokeInstruction) {
+    // SSAAbstractInvokeInstruction s = (SSAAbstractInvokeInstruction) pei;
+    // e = pointerKeys.getPointerKeyForLocal(node, s.getException());
+    // } else if (pei instanceof SSAThrowInstruction) {
+    // SSAThrowInstruction s = (SSAThrowInstruction) pei;
+    // e = pointerKeys.getPointerKeyForLocal(node, s.getException());
+    // }
+    // if (e != null) {
+    // OrdinalSet ep = getPointsToSet(e);
+    // for (Iterator it2 = ep.iterator(); it2.hasNext();) {
+    // InstanceKey ik = (InstanceKey) it2.next();
+    // if (PropagationCallGraphBuilder.catches(caughtTypes,
+    // ik.getConcreteType(), getCallGraph().getClassHierarchy())) {
+    // S.add(instanceKeys.getMappedIndex(ik));
+    // }
+    // }
+    // }
+    //
+    // // Account for those exceptions for which we do not actually have a
+    // // points-to set for
+    // // the pei, but just instance keys
+    // Collection types = pei.getExceptionTypes();
+    // if (types != null) {
+    // for (Iterator it2 = types.iterator(); it2.hasNext();) {
+    // TypeReference type = (TypeReference) it2.next();
+    // if (type != null) {
+    // InstanceKey ik =
+    // SSAPropagationCallGraphBuilder.getInstanceKeyForPEI(node, peiLoc, type,
+    // iKeyFactory);
+    // ConcreteTypeKey ck = (ConcreteTypeKey) ik;
+    // IClass klass = ck.getType();
+    // if (PropagationCallGraphBuilder.catches(caughtTypes, klass,
+    // getCallGraph().getClassHierarchy())) {
+    // S.add(instanceKeys.getMappedIndex(SSAPropagationCallGraphBuilder
+    // .getInstanceKeyForPEI(node, peiLoc, type, iKeyFactory)));
+    // }
+    // }
+    // }
+    // }
+    // }
     return new OrdinalSet<InstanceKey>(S, instanceKeys);
   }
 
@@ -428,18 +438,19 @@ public class PointerAnalysisImpl extends AbstractPointerAnalysis {
   }
 
   /**
-   * @return the points-to set for the exceptional return values from a particular call site
+   * @return the points-to set for the exceptional return values from a
+   *         particular call site
    */
   private OrdinalSet<InstanceKey> computeImplicitExceptionsForCall(CGNode node, SSAInvokeInstruction call) {
     MutableSparseIntSet S = MutableSparseIntSet.makeEmpty();
-    for (Iterator it = getCallGraph().getPossibleTargets(node, call.getCallSite()).iterator(); it.hasNext();) {
-      CGNode target = (CGNode) it.next();
-      PointerKey retVal = pointerKeys.getPointerKeyForExceptionalReturnValue(target);
-      IntSet set = getPointsToSet(retVal).getBackingSet();
-      if (set != null) {
-        S.addAll(set);
-      }
-    }
+//    for (Iterator it = getCallGraph().getPossibleTargets(node, call.getCallSite()).iterator(); it.hasNext();) {
+//      CGNode target = (CGNode) it.next();
+//      PointerKey retVal = pointerKeys.getPointerKeyForExceptionalReturnValue(target);
+//      IntSet set = getPointsToSet(retVal).getBackingSet();
+//      if (set != null) {
+//        S.addAll(set);
+//      }
+//    }
     return new OrdinalSet<InstanceKey>(S, instanceKeys);
   }
 
@@ -477,7 +488,8 @@ public class PointerAnalysisImpl extends AbstractPointerAnalysis {
     }
 
     /*
-     * @see com.ibm.wala.ipa.callgraph.propagation.PointerKeyFactory#getPointerKeyForLocal(com.ibm.detox.ipa.callgraph.CGNode, int)
+     * @see com.ibm.wala.ipa.callgraph.propagation.PointerKeyFactory#
+     * getPointerKeyForLocal(com.ibm.detox.ipa.callgraph.CGNode, int)
      */
     public PointerKey getPointerKeyForLocal(CGNode node, int valueNumber) {
       return pointerKeys.getPointerKeyForLocal(node, valueNumber);
@@ -488,15 +500,16 @@ public class PointerAnalysisImpl extends AbstractPointerAnalysis {
     }
 
     /*
-     * @see com.ibm.wala.ipa.callgraph.propagation.PointerKeyFactory#getPointerKeyForReturnValue(com.ibm.detox.ipa.callgraph.CGNode)
+     * @see com.ibm.wala.ipa.callgraph.propagation.PointerKeyFactory#
+     * getPointerKeyForReturnValue(com.ibm.detox.ipa.callgraph.CGNode)
      */
     public PointerKey getPointerKeyForReturnValue(CGNode node) {
       return pointerKeys.getPointerKeyForReturnValue(node);
     }
 
     /*
-     * @see
-     * com.ibm.wala.ipa.callgraph.propagation.PointerKeyFactory#getPointerKeyForExceptionalReturnValue(com.ibm.detox.ipa.callgraph
+     * @see com.ibm.wala.ipa.callgraph.propagation.PointerKeyFactory#
+     * getPointerKeyForExceptionalReturnValue(com.ibm.detox.ipa.callgraph
      * .CGNode)
      */
     public PointerKey getPointerKeyForExceptionalReturnValue(CGNode node) {
@@ -504,16 +517,16 @@ public class PointerAnalysisImpl extends AbstractPointerAnalysis {
     }
 
     /*
-     * @see
-     * com.ibm.wala.ipa.callgraph.propagation.PointerKeyFactory#getPointerKeyForStaticField(com.ibm.wala.classLoader.FieldReference)
+     * @see com.ibm.wala.ipa.callgraph.propagation.PointerKeyFactory#
+     * getPointerKeyForStaticField(com.ibm.wala.classLoader.FieldReference)
      */
     public PointerKey getPointerKeyForStaticField(IField f) {
       return pointerKeys.getPointerKeyForStaticField(f);
     }
 
     /*
-     * @see
-     * com.ibm.wala.ipa.callgraph.propagation.PointerKeyFactory#getPointerKeyForInstance(com.ibm.wala.ipa.callgraph.propagation.
+     * @see com.ibm.wala.ipa.callgraph.propagation.PointerKeyFactory#
+     * getPointerKeyForInstance(com.ibm.wala.ipa.callgraph.propagation.
      * InstanceKey, com.ibm.wala.classLoader.FieldReference)
      */
     public PointerKey getPointerKeyForInstanceField(InstanceKey I, IField field) {
@@ -522,8 +535,8 @@ public class PointerAnalysisImpl extends AbstractPointerAnalysis {
     }
 
     /*
-     * @see
-     * com.ibm.wala.ipa.callgraph.propagation.PointerKeyFactory#getPointerKeyForArrayContents(com.ibm.wala.ipa.callgraph.propagation
+     * @see com.ibm.wala.ipa.callgraph.propagation.PointerKeyFactory#
+     * getPointerKeyForArrayContents(com.ibm.wala.ipa.callgraph.propagation
      * .InstanceKey)
      */
     public PointerKey getPointerKeyForArrayContents(InstanceKey I) {
@@ -536,7 +549,8 @@ public class PointerAnalysisImpl extends AbstractPointerAnalysis {
   }
 
   /*
-   * @see com.ibm.wala.ipa.callgraph.propagation.PointerAnalysis#iteratePointerKeys()
+   * @see
+   * com.ibm.wala.ipa.callgraph.propagation.PointerAnalysis#iteratePointerKeys()
    */
   public Iterable<PointerKey> getPointerKeys() {
     return Iterator2Iterable.make(pointsToMap.iterateKeys());

@@ -105,12 +105,12 @@ public abstract class SSAPropagationCallGraphBuilder extends PropagationCallGrap
    * Should we periodically clear out soft reference caches in an attempt to
    * help the GC?
    */
-  public final static boolean PERIODIC_WIPE_SOFT_CACHES = true;
+  public final static boolean PERIODIC_WIPE_SOFT_CACHES = false;
 
   /**
    * Interval which defines the period to clear soft reference caches
    */
-  public final static int WIPE_SOFT_CACHE_INTERVAL = 2500;
+  public final static int WIPE_SOFT_CACHE_INTERVAL = 250000;
 
   /**
    * Counter for wiping soft caches

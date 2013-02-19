@@ -19,7 +19,7 @@ import com.ibm.wala.ipa.callgraph.impl.Everywhere;
  * 
  * This doesn't work very well ... GCs don't do such a great job with SoftReferences ... revamp it.
  */
-public class SSACache {
+public class SSACache implements ISSACache {
 
   /**
    * used for debugging
@@ -48,11 +48,8 @@ public class SSACache {
     this.factory = factory;
   }
 
-  /**
-   * @param m a "normal" (bytecode-based) method
-   * @param options options governing ssa construction
-   * @return an IR for m, built according to the specified options. null if m is abstract or native.
-   * @throws IllegalArgumentException if m is null
+  /* 
+   * @see com.ibm.wala.ssa.ISSACache#findOrCreateIR(com.ibm.wala.classLoader.IMethod, com.ibm.wala.ipa.callgraph.Context, com.ibm.wala.ssa.SSAOptions)
    */
   public synchronized IR findOrCreateIR(final IMethod m, Context c, final SSAOptions options) {
 
@@ -79,11 +76,8 @@ public class SSACache {
     return ir;
   }
 
-  /**
-   * @param m a method
-   * @param options options governing ssa construction
-   * @return DefUse information for m, built according to the specified options. null if unavailable
-   * @throws IllegalArgumentException if m is null
+  /* 
+   * @see com.ibm.wala.ssa.ISSACache#findOrCreateDU(com.ibm.wala.classLoader.IMethod, com.ibm.wala.ipa.callgraph.Context, com.ibm.wala.ssa.SSAOptions)
    */
   public synchronized DefUse findOrCreateDU(IMethod m, Context c, SSAOptions options) {
     if (m == null) {
@@ -105,9 +99,8 @@ public class SSACache {
     return du;
   }
 
-  /**
-   * @return {@link DefUse} information for m, built according to the specified options. null if unavailable
-   * @throws IllegalArgumentException if ir is null
+  /* 
+   * @see com.ibm.wala.ssa.ISSACache#findOrCreateDU(com.ibm.wala.ssa.IR, com.ibm.wala.ipa.callgraph.Context)
    */
   public synchronized DefUse findOrCreateDU(IR ir, Context C) {
     if (ir == null) {
@@ -121,30 +114,30 @@ public class SSACache {
     return du;
   }
 
-  /**
-   * The existence of this is unfortunate.
+  /* 
+   * @see com.ibm.wala.ssa.ISSACache#wipe()
    */
   public void wipe() {
     irCache.wipe();
     duCache.wipe();
   }
 
-  /**
-   * Invalidate the cached IR for a <method,context> pair
+  /* 
+   * @see com.ibm.wala.ssa.ISSACache#invalidateIR(com.ibm.wala.classLoader.IMethod, com.ibm.wala.ipa.callgraph.Context)
    */
   public void invalidateIR(IMethod method, Context c) {
     irCache.invalidate(method, c);
   }
 
-  /**
-   * Invalidate the cached {@link DefUse} for a <method,context> pair
+  /* 
+   * @see com.ibm.wala.ssa.ISSACache#invalidateDU(com.ibm.wala.classLoader.IMethod, com.ibm.wala.ipa.callgraph.Context)
    */
   public void invalidateDU(IMethod method, Context c) {
     duCache.invalidate(method, c);
   }
 
-  /**
-   * Invalidate all cached information for a <method,context> pair
+  /* 
+   * @see com.ibm.wala.ssa.ISSACache#invalidate(com.ibm.wala.classLoader.IMethod, com.ibm.wala.ipa.callgraph.Context)
    */
   public void invalidate(IMethod method, Context c) {
     invalidateIR(method, c);

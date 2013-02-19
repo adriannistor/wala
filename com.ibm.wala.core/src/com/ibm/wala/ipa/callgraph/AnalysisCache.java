@@ -16,6 +16,7 @@ import com.ibm.wala.ssa.DefUse;
 import com.ibm.wala.ssa.DefaultIRFactory;
 import com.ibm.wala.ssa.IR;
 import com.ibm.wala.ssa.IRFactory;
+import com.ibm.wala.ssa.ISSACache;
 import com.ibm.wala.ssa.SSACache;
 import com.ibm.wala.ssa.SSAOptions;
 import com.ibm.wala.util.ref.ReferenceCleanser;
@@ -28,7 +29,7 @@ import com.ibm.wala.util.ref.ReferenceCleanser;
 public class AnalysisCache {
   private final IRFactory<IMethod> irFactory;
 
-  private final SSACache ssaCache;
+  private final ISSACache ssaCache;
 
   public AnalysisCache(IRFactory<IMethod> irFactory) {
     super();
@@ -45,7 +46,7 @@ public class AnalysisCache {
     ssaCache.invalidate(method, C);
   }
 
-  public SSACache getSSACache() {
+  public ISSACache getSSACache() {
     return ssaCache;
   }
 

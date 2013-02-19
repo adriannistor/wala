@@ -32,9 +32,13 @@ public class AnalysisCache {
   private final ISSACache ssaCache;
 
   public AnalysisCache(IRFactory<IMethod> irFactory) {
+    this(irFactory, new SSACache(irFactory));
+  }
+
+  public AnalysisCache(IRFactory<IMethod> irFactory, ISSACache ssaCache) {
     super();
     this.irFactory = irFactory;
-    this.ssaCache = new SSACache(irFactory);
+    this.ssaCache = ssaCache;
     ReferenceCleanser.registerCache(this);
   }
 
@@ -64,9 +68,8 @@ public class AnalysisCache {
     return ssaCache.findOrCreateIR(method, Everywhere.EVERYWHERE, new AnalysisOptions().getSSAOptions());
   }
 
-
   /**
-   * Find or create a DefUse for the IR using the {@link Everywhere} context 
+   * Find or create a DefUse for the IR using the {@link Everywhere} context
    */
   public DefUse getDefUse(IR ir) {
     if (ir == null) {

@@ -23,6 +23,7 @@ import com.ibm.wala.ipa.cha.IClassHierarchy;
 import com.ibm.wala.shrikeBT.BytecodeConstants;
 import com.ibm.wala.shrikeBT.IInvokeInstruction;
 import com.ibm.wala.ssa.SSAAbstractInvokeInstruction;
+import com.ibm.wala.ssa.SSAInstruction;
 import com.ibm.wala.ssa.SSANewInstruction;
 import com.ibm.wala.types.MethodReference;
 import com.ibm.wala.types.TypeReference;
@@ -38,6 +39,8 @@ public abstract class Entrypoint implements BytecodeConstants {
    */
   protected final IMethod method;
 
+  protected boolean[] isSymbolicParameter;
+
   /**
    * @param method the method to be called for this entrypoint
    */
@@ -46,6 +49,7 @@ public abstract class Entrypoint implements BytecodeConstants {
       throw new IllegalArgumentException("method is null");
     }
     this.method = method;
+    this.isSymbolicParameter = new boolean[method.getNumberOfParameters()];
     assert method.getDeclaringClass() != null : "null declaring class";
   }
 
@@ -57,6 +61,7 @@ public abstract class Entrypoint implements BytecodeConstants {
     if (m == null) {
       Assertions.UNREACHABLE("could not resolve " + method);
     }
+    this.isSymbolicParameter = new boolean[method.getNumberOfParameters()];
     this.method = m;
   }
 
@@ -101,14 +106,14 @@ public abstract class Entrypoint implements BytecodeConstants {
       if (p[0].isPrimitiveType()) {
         return m.addLocal();
       } else {
-        SSANewInstruction n = m.addAllocation(p[0]);
+        SSAInstruction n = makeAllocation(m, i, p[0]);
         return (n == null) ? -1 : n.getDef();
       }
     } else {
       int[] values = new int[p.length];
       int countErrors = 0;
       for (int j = 0; j < p.length; j++) {
-        SSANewInstruction n = m.addAllocation(p[j]);
+        SSAInstruction n = makeAllocation(m, i, p[j]);
         int value = (n == null) ? -1 : n.getDef();
         if (value == -1) {
           countErrors++;
@@ -140,6 +145,17 @@ public abstract class Entrypoint implements BytecodeConstants {
 
       return m.addPhi(values);
     }
+  }
+
+  private SSAInstruction makeAllocation(AbstractRootMethod m, int i, TypeReference t) {
+    if (isSymbolicParameter[i])
+      return m.addSymbolicAllocation(t);
+    else
+      return m.addAllocation(t);
+  }
+
+  public void makeSymbolicParameter(int i) {
+    isSymbolicParameter[i] = true;
   }
 
   @Override

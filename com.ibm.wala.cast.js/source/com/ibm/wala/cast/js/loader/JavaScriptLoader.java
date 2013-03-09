@@ -100,6 +100,7 @@ import com.ibm.wala.ssa.SSALoadIndirectInstruction;
 import com.ibm.wala.ssa.SSALoadMetadataInstruction;
 import com.ibm.wala.ssa.SSAMonitorInstruction;
 import com.ibm.wala.ssa.SSANewInstruction;
+import com.ibm.wala.ssa.SSANewSymbolicInstruction;
 import com.ibm.wala.ssa.SSAPhiInstruction;
 import com.ibm.wala.ssa.SSAPiInstruction;
 import com.ibm.wala.ssa.SSAPutInstruction;
@@ -530,6 +531,15 @@ public class JavaScriptLoader extends CAstAbstractModuleLoader {
           return new SetPrototype(object, prototype);
         }
 
+        @Override
+        public SSANewSymbolicInstruction NewSymbolicInstruction(int i, TypeReference type) {
+          throw new UnsupportedOperationException(); //TODO: make symbolic instructions work for js
+        }
+        
+        @Override
+        public SSANewSymbolicInstruction NewSymbolicInstruction(int i, TypeReference type, int[] params) {
+          throw new UnsupportedOperationException(); //TODO: make symbolic instructions work for js
+        }
       };
     }
 

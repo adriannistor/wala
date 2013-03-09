@@ -37,6 +37,7 @@ import com.ibm.wala.ssa.SSAInstruction;
 import com.ibm.wala.ssa.SSAInstructionFactory;
 import com.ibm.wala.ssa.SSAInvokeInstruction;
 import com.ibm.wala.ssa.SSANewInstruction;
+import com.ibm.wala.ssa.SSANewSymbolicInstruction;
 import com.ibm.wala.ssa.SSAOptions;
 import com.ibm.wala.ssa.SSAPhiInstruction;
 import com.ibm.wala.ssa.SSAReturnInstruction;
@@ -191,6 +192,40 @@ public abstract class AbstractRootMethod extends SyntheticMethod {
     return addAllocation(T, false);
   }
 
+  
+  /**
+   * Add a New statement of the given type
+   * 
+   * @return instruction added, or null
+   * @throws IllegalArgumentException if T is null
+   */
+  public SSANewSymbolicInstruction addSymbolicAllocation(TypeReference T) {
+    if (T == null) {
+      throw new IllegalArgumentException("T is null");
+    }
+    int instance = nextLocal++;
+    SSANewSymbolicInstruction result = null;
+
+    if (T.isReferenceType()) {
+      if (T.isArrayType()) {
+        int[] sizes = new int[((ArrayClass)cha.lookupClass(T)).getDimensionality()];
+        Arrays.fill(sizes, getValueNumberForIntConstant(1));
+        result = insts.NewSymbolicInstruction(instance, T, sizes);
+      } else {
+        result = insts.NewSymbolicInstruction(instance, T);
+      }
+      statements.add(result);
+
+      IClass klass = cha.lookupClass(T);
+      if (klass == null) {
+        Warnings.add(AllocationFailure.create(T));
+        return null;
+      }
+    }
+    cache.invalidate(this, Everywhere.EVERYWHERE);
+    return result;
+  }
+  
   /**
    * Add a New statement of the given type
    * 

@@ -110,6 +110,8 @@ public abstract class SSAInstruction {
     void visitGetCaughtException(SSAGetCaughtExceptionInstruction instruction);
 
     void visitLoadMetadata(SSALoadMetadataInstruction instruction);
+
+    void visitNewSymbolic(SSANewSymbolicInstruction ssaNewSymbolicInstruction);
   }
 
   /**
@@ -156,6 +158,9 @@ public abstract class SSAInstruction {
     }
 
     public void visitNew(SSANewInstruction instruction) {
+    }
+    
+    public void visitNewSymbolic(SSANewSymbolicInstruction instruction) {
     }
 
     public void visitArrayLength(SSAArrayLengthInstruction instruction) {

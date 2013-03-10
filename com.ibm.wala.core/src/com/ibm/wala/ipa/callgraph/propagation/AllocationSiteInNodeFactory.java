@@ -93,6 +93,22 @@ public class AllocationSiteInNodeFactory implements InstanceKeyFactory {
 
     return key;
   }
+  
+  public InstanceKey getInstanceKeyForSymbolicType(TypeReference typeRef) {
+    return AllocationSiteInNodeFactory.getInstanceKeyForSymbolic(cha, typeRef);
+  }
+
+  public static InstanceKey getInstanceKeyForSymbolic(IClassHierarchy cha, TypeReference typeRef) {
+    IClass type = cha.lookupClass(typeRef);
+    if (type == null) {
+      return null;
+    }
+
+    // TODO: add code to disallow recursion in contexts    
+    InstanceKey key = new SymbolicTypeKey(type);
+
+    return key;
+  }
 
   public InstanceKey getInstanceKeyForMultiNewArray(CGNode node, NewSiteReference allocation, int dim) {
     ArrayClass type = (ArrayClass) options.getClassTargetSelector().getAllocatedTarget(node, allocation);

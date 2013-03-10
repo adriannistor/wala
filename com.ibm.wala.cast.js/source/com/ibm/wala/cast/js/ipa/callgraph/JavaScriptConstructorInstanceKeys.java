@@ -3,6 +3,7 @@ package com.ibm.wala.cast.js.ipa.callgraph;
 import com.ibm.wala.classLoader.NewSiteReference;
 import com.ibm.wala.classLoader.ProgramCounter;
 import com.ibm.wala.ipa.callgraph.CGNode;
+import com.ibm.wala.ipa.callgraph.propagation.AllocationSiteInNodeFactory;
 import com.ibm.wala.ipa.callgraph.propagation.InstanceKey;
 import com.ibm.wala.ipa.callgraph.propagation.InstanceKeyFactory;
 import com.ibm.wala.ipa.callgraph.propagation.NormalAllocationInNode;
@@ -23,6 +24,10 @@ public class JavaScriptConstructorInstanceKeys implements InstanceKeyFactory {
     } else {
       return base.getInstanceKeyForAllocation(node, allocation);
     }
+  }
+
+  public InstanceKey getInstanceKeyForSymbolicType(TypeReference type) {
+    return base.getInstanceKeyForSymbolicType(type);
   }
 
   public InstanceKey getInstanceKeyForClassObject(TypeReference type) {

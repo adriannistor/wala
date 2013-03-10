@@ -61,7 +61,7 @@ public abstract class Entrypoint implements BytecodeConstants {
     if (m == null) {
       Assertions.UNREACHABLE("could not resolve " + method);
     }
-    this.isSymbolicParameter = new boolean[method.getNumberOfParameters()];
+    this.isSymbolicParameter = new boolean[m.getNumberOfParameters()];
     this.method = m;
   }
 

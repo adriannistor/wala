@@ -67,6 +67,10 @@ public class SmushedAllocationSiteInstanceKeys implements InstanceKeyFactory {
 
     return key;
   }
+  
+  public InstanceKey getInstanceKeyForSymbolicType(TypeReference type) {
+    return classBased.getInstanceKeyForSymbolicType(type);
+  }
 
   public InstanceKey getInstanceKeyForMultiNewArray(CGNode node, NewSiteReference allocation, int dim) {
     ArrayClass type = (ArrayClass) options.getClassTargetSelector().getAllocatedTarget(node, allocation);

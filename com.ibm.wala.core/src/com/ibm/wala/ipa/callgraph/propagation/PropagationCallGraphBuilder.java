@@ -740,6 +740,10 @@ public abstract class PropagationCallGraphBuilder implements CallGraphBuilder {
     return instanceKeyFactory.getInstanceKeyForAllocation(node, allocation);
   }
 
+  public InstanceKey getInstanceKeyForSymbolicType(TypeReference type) {
+    return instanceKeyFactory.getInstanceKeyForSymbolicType(type);
+  }
+
   /**
    * @param dim the dimension of the array whose instance we would like to model. dim == 0 represents the first dimension, e.g., the
    *          [Object; instances in [[Object; e.g., the [[Object; instances in [[[Object; dim == 1 represents the second dimension,

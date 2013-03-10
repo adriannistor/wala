@@ -49,6 +49,10 @@ public class DelegatingExtendedHeapModel implements ExtendedHeapModel {
   public InstanceKey getInstanceKeyForAllocation(CGNode node, NewSiteReference allocation) {
     return h.getInstanceKeyForAllocation(node, allocation);
   }
+  
+  public InstanceKey getInstanceKeyForSymbolicType(TypeReference type) {
+    return h.getInstanceKeyForSymbolicType(type);
+  }
 
   public InstanceKey getInstanceKeyForClassObject(TypeReference type) {
     return h.getInstanceKeyForClassObject(type);

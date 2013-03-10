@@ -134,7 +134,23 @@ public class PointerAnalysisImpl extends AbstractPointerAnalysis {
       return OrdinalSet.empty();
     } else {
       IntSet S = v.getValue();
-      return new OrdinalSet<InstanceKey>(S, instanceKeys);
+      OrdinalSet<InstanceKey> pointsTo = new OrdinalSet<InstanceKey>(S, instanceKeys);
+      
+      // handling symbolic instances
+      if(key instanceof InstanceFieldKey) { // TODO: make it work for ArrayFieldKey
+        InstanceFieldKey ifk = (InstanceFieldKey) key;
+        if(ifk.getInstanceKey() instanceof SymbolicTypeKey) {
+          InstanceKey symbolicInstance = iKeyFactory.getInstanceKeyForSymbolicType(ifk.getField().getFieldTypeReference());
+          if(!pointsTo.contains(symbolicInstance)) {
+            int index = instanceKeys.getMappedIndex(symbolicInstance);
+            if(index == -1) 
+              index = instanceKeys.add(symbolicInstance);
+            v.add(index);
+          }
+        }
+      }
+      
+      return pointsTo;
     }
   }
 
@@ -459,6 +475,10 @@ public class PointerAnalysisImpl extends AbstractPointerAnalysis {
 
     public InstanceKey getInstanceKeyForAllocation(CGNode node, NewSiteReference allocation) {
       return iKeyFactory.getInstanceKeyForAllocation(node, allocation);
+    }
+    
+    public InstanceKey getInstanceKeyForSymbolicType(TypeReference type) {
+      return iKeyFactory.getInstanceKeyForSymbolicType(type);
     }
 
     public InstanceKey getInstanceKeyForMultiNewArray(CGNode node, NewSiteReference allocation, int dim) {

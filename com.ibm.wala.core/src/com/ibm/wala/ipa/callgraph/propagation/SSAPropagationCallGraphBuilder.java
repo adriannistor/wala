@@ -60,6 +60,7 @@ import com.ibm.wala.ssa.SSAInstruction;
 import com.ibm.wala.ssa.SSAInvokeInstruction;
 import com.ibm.wala.ssa.SSALoadMetadataInstruction;
 import com.ibm.wala.ssa.SSANewInstruction;
+import com.ibm.wala.ssa.SSANewSymbolicInstruction;
 import com.ibm.wala.ssa.SSAPhiInstruction;
 import com.ibm.wala.ssa.SSAPiInstruction;
 import com.ibm.wala.ssa.SSAPutInstruction;
@@ -597,6 +598,10 @@ public abstract class SSAPropagationCallGraphBuilder extends PropagationCallGrap
 
     public InstanceKey getInstanceKeyForAllocation(NewSiteReference allocation) {
       return getBuilder().getInstanceKeyForAllocation(node, allocation);
+    }
+    
+    public InstanceKey getInstanceKeyForSymbolicAllocation(TypeReference type) {
+      return getBuilder().getInstanceKeyForSymbolicType(type);
     }
 
     public InstanceKey getInstanceKeyForMultiNewArray(NewSiteReference allocation, int dim) {
@@ -1163,6 +1168,41 @@ public abstract class SSAPropagationCallGraphBuilder extends PropagationCallGrap
         }
       }
     }
+    
+    @Override
+    public void visitNewSymbolic(SSANewSymbolicInstruction instruction) {
+      InstanceKey iKey = getInstanceKeyForSymbolicAllocation(instruction.getTypeReference());
+      if (iKey == null) {
+        // something went wrong. I hope someone raised a warning.
+        return;
+      }
+      PointerKey def = getPointerKeyForLocal(instruction.getDef());
+      IClass klass = iKey.getConcreteType();
+
+      if (DEBUG) {
+        System.err.println("visitNewSymbolic: " + instruction + " " + iKey + " " + system.findOrCreateIndexForInstanceKey(iKey));
+      }
+
+      if (klass == null) {
+        if (DEBUG) {
+          System.err.println("Resolution failure: " + instruction);
+        }
+        return;
+      }
+
+      if (!contentsAreInvariant(symbolTable, du, instruction.getDef())) {
+        system.newConstraint(def, iKey);
+      } else {
+        system.findOrCreateIndexForInstanceKey(iKey);
+        system.recordImplicitPointsToSet(def);
+      }
+
+      // side effect of new: may call class initializer
+      if (DEBUG) {
+        System.err.println("visitNewSymbolic call clinit: " + klass);
+      }
+      processSubclassInitializers(klass);
+    }
 
     /*
      * @see com.ibm.wala.ssa.Instruction.Visitor#visitThrow(com.ibm.wala.ssa.ThrowInstruction)
@@ -1427,6 +1467,12 @@ public abstract class SSAPropagationCallGraphBuilder extends PropagationCallGrap
       if (sc != null) {
         processClassInitializer(sc);
       }
+    }
+    
+    private void processSubclassInitializers(IClass klass) {
+      processClassInitializer(klass);
+      for (IClass subklass : klass.getClassHierarchy().getImmediateSubclasses(klass)) 
+        processSubclassInitializers(subklass);
     }
   }
 

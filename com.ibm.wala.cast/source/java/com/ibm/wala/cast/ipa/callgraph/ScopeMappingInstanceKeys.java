@@ -21,6 +21,7 @@ import com.ibm.wala.classLoader.ProgramCounter;
 import com.ibm.wala.ipa.callgraph.CGNode;
 import com.ibm.wala.ipa.callgraph.CallGraph;
 import com.ibm.wala.ipa.callgraph.ContextItem;
+import com.ibm.wala.ipa.callgraph.propagation.AllocationSiteInNodeFactory;
 import com.ibm.wala.ipa.callgraph.propagation.InstanceKey;
 import com.ibm.wala.ipa.callgraph.propagation.InstanceKeyFactory;
 import com.ibm.wala.ipa.callgraph.propagation.PointerKey;
@@ -197,6 +198,10 @@ abstract public class ScopeMappingInstanceKeys implements InstanceKeyFactory {
     } else {
       return base;
     }
+  }
+  
+  public InstanceKey getInstanceKeyForSymbolicType(TypeReference type) {
+    return basic.getInstanceKeyForSymbolicType(type);
   }
 
   /**

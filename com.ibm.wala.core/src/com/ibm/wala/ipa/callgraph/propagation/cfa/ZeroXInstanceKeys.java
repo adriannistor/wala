@@ -202,6 +202,10 @@ public class ZeroXInstanceKeys implements InstanceKeyFactory {
       return classBased.getInstanceKeyForAllocation(node, allocation);
     }
   }
+  
+  public InstanceKey getInstanceKeyForSymbolicType(TypeReference type) {
+    return classBased.getInstanceKeyForSymbolicType(type);
+  }
 
   /**
    * side effect: populates the smush map.

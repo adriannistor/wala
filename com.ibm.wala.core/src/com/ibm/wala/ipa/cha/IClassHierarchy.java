@@ -157,8 +157,13 @@ public interface IClassHierarchy extends Iterable<IClass> {
   /**
    * @return the classes that immediately extend klass.
    */
-  public Collection<IClass> getImmediateSubclasses(IClass klass);
+   public Collection<IClass> getImmediateSubclasses(IClass klass);
 
+   /**
+    * @return the all classes that transitively extend klass
+    */
+   public Collection<IClass> getAllSubclasses(IClass klass);
+   
   /**
    * Does an expression c1 x := c2 y typecheck?
    * 

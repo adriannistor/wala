@@ -10,6 +10,8 @@
  *******************************************************************************/
 package com.ibm.wala.ipa.callgraph.propagation;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -712,7 +714,44 @@ public abstract class PropagationCallGraphBuilder implements CallGraphBuilder {
       return null;
     }
   }
-  
+
+  /**
+   * @param caller the caller node
+   * @param iKey an abstraction of the symbolic receiver of the call (or null if not applicable)
+   * @return the CGNode s to which this particular call should dispatch.
+   */
+  protected Set<CGNode> getTargetsForSymbolicCall(CGNode caller, CallSiteReference site, IClass recv, InstanceKey iKey[]) {
+    Collection<IClass> allPossibleClasses = cha.getAllSubclasses(recv);
+    Set<IMethod> allTargets = HashSetFactory.make();
+
+    for (IClass iClass : allPossibleClasses) {
+      IMethod targetMethod = options.getMethodTargetSelector().getCalleeTarget(caller, site, iClass);
+
+      // this most likely indicates an exclusion at work; the target selector
+      // should have issued a warning
+      // ...not really in the modified target selector, think about this a bit
+      if (targetMethod != null && !targetMethod.isAbstract()) {
+        allTargets.add(targetMethod);
+      }
+    }
+
+    Set<CGNode> allNodes = HashSetFactory.make();
+
+    for (IMethod targetMethod : allTargets) {
+      Context targetContext = contextSelector.getCalleeTarget(caller, site, targetMethod, iKey);
+      if (targetContext instanceof IllegalArgumentExceptionContext) {
+        continue;
+      }
+      try {
+        CGNode node = getCallGraph().findOrCreateNode(targetMethod, targetContext);
+        allNodes.add(node);
+      } catch (CancelException e) {
+      }
+    }
+
+    return allNodes;
+  }
+
   /**
    * @return the context selector for this call graph builder
    */
@@ -1012,6 +1051,15 @@ public abstract class PropagationCallGraphBuilder implements CallGraphBuilder {
           if (!representsNullType(I)) {
             PointerKey p = getPointerKeyForInstanceField(I, getField());
 
+            // handling symbolic instances
+            if(p instanceof AbstractFieldPointerKey) { // TODO: make it work for ArrayFieldKey
+              AbstractFieldPointerKey ifk = (AbstractFieldPointerKey) p;
+              if(ifk.getInstanceKey() instanceof SymbolicTypeKey) {
+                InstanceKey symbolicInstance = instanceKeyFactory.getInstanceKeyForSymbolicType(getField().getFieldTypeReference());
+                system.newConstraint(p, symbolicInstance);
+              }
+            }
+            
             if (p != null) {
               if (DEBUG_GET) {
                 String S = "Getfield add constraint " + dVal + " " + p;

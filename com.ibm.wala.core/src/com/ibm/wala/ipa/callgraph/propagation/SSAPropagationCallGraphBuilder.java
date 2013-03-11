@@ -624,6 +624,10 @@ public abstract class SSAPropagationCallGraphBuilder extends PropagationCallGrap
     public CGNode getTargetForCall(CGNode caller, CallSiteReference site, IClass recv, InstanceKey iKey[]) {
       return getBuilder().getTargetForCall(caller, site, recv, iKey);
     }
+    
+    public Set<CGNode> getTargetForSymbolicCall(CGNode caller, CallSiteReference site, IClass recv, InstanceKey iKey[]) {
+      return getBuilder().getTargetsForSymbolicCall(caller, site, recv, iKey);
+    }
 
     protected boolean contentsAreInvariant(SymbolTable symbolTable, DefUse du, int valueNumber) {
       return getBuilder().contentsAreInvariant(symbolTable, du, valueNumber);
@@ -1767,28 +1771,35 @@ public abstract class SSAPropagationCallGraphBuilder extends PropagationCallGrap
             }
           }
         }
-        CGNode target = getTargetForCall(node, call.getCallSite(), keys[0].getConcreteType(), keys);
-        if (target == null) {
-          // This indicates an error; I sure hope getTargetForCall
-          // raised a warning about this!
-          if (DEBUG) {
-            System.err.println("Warning: null target for call " + call);
-          }
+        Set<CGNode> nodeTargets;
+        if(keys[0].getConcreteType() instanceof SymbolicTypeKey) { //TODO: add a method .isSymbolic() to InstanceKey signature
+          nodeTargets = getTargetsForSymbolicCall(node, call.getCallSite(),keys[0].getConcreteType(), keys);
         } else {
-          IntSet targets = getCallGraph().getPossibleTargetNumbers(node, call.getCallSite());
-          // even if we've seen this target before, if we have constant
-          // parameters, we may need to re-process the call, as the constraints
-          // for the first time we reached this target may not have been fully
-          // general. TODO a more refined check?
-          if (targets != null && targets.contains(target.getGraphNodeId()) && noConstParams()) {
-            // do nothing; we've previously discovered and handled this
-            // receiver for this call site.
+          nodeTargets = Collections.singleton(getTargetForCall(node, call.getCallSite(),keys[0].getConcreteType(), keys));
+        }
+        for(CGNode target: nodeTargets) {
+          if (target == null) {
+            // This indicates an error; I sure hope getTargetForCall
+            // raised a warning about this!
+            if (DEBUG) {
+              System.err.println("Warning: null target for call " + call);
+            }
           } else {
-            // process the newly discovered target for this call
-            sideEffect.b = true;
-            processResolvedCall(node, call, target, constParams, uniqueCatch);
-            if (!haveAlreadyVisited(target)) {
-              markDiscovered(target);
+            IntSet targets = getCallGraph().getPossibleTargetNumbers(node, call.getCallSite());
+            // even if we've seen this target before, if we have constant
+            // parameters, we may need to re-process the call, as the constraints
+            // for the first time we reached this target may not have been fully
+            // general. TODO a more refined check?
+            if (targets != null && targets.contains(target.getGraphNodeId()) && noConstParams()) {
+              // do nothing; we've previously discovered and handled this
+              // receiver for this call site.
+            } else {
+              // process the newly discovered target for this call
+              sideEffect.b = true;
+              processResolvedCall(node, call, target, constParams, uniqueCatch);
+              if (!haveAlreadyVisited(target)) {
+                markDiscovered(target);
+              }
             }
           }
         }
@@ -1917,10 +1928,13 @@ public abstract class SSAPropagationCallGraphBuilder extends PropagationCallGrap
         if (site.isDispatch()) {
           recv = v[0].getConcreteType();
         }
-        CGNode target = getTargetForCall(caller, site, recv, v);
-        if (target != null) {
-          targets.add(target);
-        }
+        if(recv instanceof SymbolicTypeKey) 
+          targets.addAll(getTargetsForSymbolicCall(caller, site, recv, v));
+        else {
+          CGNode target = getTargetForCall(caller, site, recv, v);
+          if (target != null) 
+            targets.add(target);
+          }
       }
     };
     iterateCrossProduct(caller, instruction, params, invs, f);

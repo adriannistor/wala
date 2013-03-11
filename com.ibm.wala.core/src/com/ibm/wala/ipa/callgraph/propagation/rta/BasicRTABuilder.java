@@ -10,7 +10,9 @@
  *******************************************************************************/
 package com.ibm.wala.ipa.callgraph.propagation.rta;
 
+import java.util.Collections;
 import java.util.Iterator;
+import java.util.Set;
 
 import com.ibm.wala.analysis.reflection.CloneInterpreter;
 import com.ibm.wala.classLoader.CallSiteReference;
@@ -29,6 +31,7 @@ import com.ibm.wala.ipa.callgraph.propagation.InstanceKey;
 import com.ibm.wala.ipa.callgraph.propagation.PointerKey;
 import com.ibm.wala.ipa.callgraph.propagation.PointsToSetVariable;
 import com.ibm.wala.ipa.callgraph.propagation.SSAContextInterpreter;
+import com.ibm.wala.ipa.callgraph.propagation.SymbolicTypeKey;
 import com.ibm.wala.ipa.cha.IClassHierarchy;
 import com.ibm.wala.types.Selector;
 import com.ibm.wala.util.intset.IntSet;
@@ -154,38 +157,45 @@ public class BasicRTABuilder extends AbstractRTABuilder {
             System.err.println(("    dispatch to ptr " + ptr));
           }
           InstanceKey iKey = system.getInstanceKey(ptr);
-
-          CGNode target = getTargetForCall(caller, site, iKey.getConcreteType(), new InstanceKey[]{iKey});
-          if (target == null) {
-            // This indicates an error; I sure hope getTargetForCall
-            // raised a warning about this!
-            if (DEBUG) {
-              System.err.println(("Warning: null target for call " + site + " " + iKey));
+          
+          Set<CGNode> nodeTargets;
+          if(iKey instanceof SymbolicTypeKey) { //TODO: add a method .isSymbolic() to InstanceKey signature
+            nodeTargets = getTargetsForSymbolicCall(caller, site, iKey.getConcreteType(), new InstanceKey[]{iKey});
+          } else {
+            nodeTargets = Collections.singleton(getTargetForCall(caller, site, iKey.getConcreteType(), new InstanceKey[]{iKey}));
+          }
+          for(CGNode target : nodeTargets) {
+            if (target == null) {
+              // This indicates an error; I sure hope getTargetForCall
+              // raised a warning about this!
+              if (DEBUG) {
+                System.err.println(("Warning: null target for call " + site + " " + iKey));
+              }
+              continue;
             }
-            return;
-          }
-          if (clone2Assign) {
-            if (target.getMethod().getReference().equals(CloneInterpreter.CLONE)) {
-              // (mostly) ignore a call to clone: it won't affect the
-              // solution, but we should probably at least have a call
-              // edge
-              caller.addTarget(site, target);
-              return;
+            if (clone2Assign) {
+              if (target.getMethod().getReference().equals(CloneInterpreter.CLONE)) {
+                // (mostly) ignore a call to clone: it won't affect the
+                // solution, but we should probably at least have a call
+                // edge
+                caller.addTarget(site, target);
+                continue;
+              }
             }
-          }
-
-          IntSet targets = getCallGraph().getPossibleTargetNumbers(caller, site);
-          if (targets != null && targets.contains(target.getGraphNodeId())) {
-            // do nothing; we've previously discovered and handled this
-            // receiver for this call site.
-            return;
-          }
-
-          // process the newly discovered target for this call
-          processResolvedCall(caller, site, target);
-
-          if (!haveAlreadyVisited(target)) {
-            markDiscovered(target);
+  
+            IntSet targets = getCallGraph().getPossibleTargetNumbers(caller, site);
+            if (targets != null && targets.contains(target.getGraphNodeId())) {
+              // do nothing; we've previously discovered and handled this
+              // receiver for this call site.
+              continue;
+            }
+  
+            // process the newly discovered target for this call
+            processResolvedCall(caller, site, target);
+  
+            if (!haveAlreadyVisited(target)) {
+              markDiscovered(target);
+            }
           }
         }
       };

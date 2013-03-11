@@ -78,6 +78,10 @@ public interface SSAInstructionFactory {
   SSANewInstruction NewInstruction(int result, NewSiteReference site);
 
   SSANewInstruction NewInstruction(int result, NewSiteReference site, int[] params);
+  
+  SSANewSymbolicInstruction NewSymbolicInstruction(int i, TypeReference type);
+  
+  SSANewSymbolicInstruction NewSymbolicInstruction(int i, TypeReference type, int[] params);
 
   SSAPhiInstruction PhiInstruction(int result, int[] params);
 

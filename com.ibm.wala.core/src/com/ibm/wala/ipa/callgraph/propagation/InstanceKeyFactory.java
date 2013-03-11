@@ -25,6 +25,11 @@ public interface InstanceKeyFactory {
   public abstract InstanceKey getInstanceKeyForAllocation(CGNode node, NewSiteReference allocation);
 
   /**
+   * @return the instance key for a symbolic allocation 
+   */
+  public abstract InstanceKey getInstanceKeyForSymbolicType(TypeReference type);
+  
+  /**
    * @return the instance key that represents the array allocated as the dim_th
    *         dimension at a particular allocation
    */

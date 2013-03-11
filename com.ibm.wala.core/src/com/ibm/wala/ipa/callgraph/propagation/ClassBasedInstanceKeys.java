@@ -132,6 +132,10 @@ public class ClassBasedInstanceKeys implements InstanceKeyFactory {
 
   }
 
+  public InstanceKey getInstanceKeyForSymbolicType(TypeReference typeRef) {
+    return AllocationSiteInNodeFactory.getInstanceKeyForSymbolic(cha, typeRef);
+  }
+  
   /**
    * @return Returns the class hierarchy.
    */

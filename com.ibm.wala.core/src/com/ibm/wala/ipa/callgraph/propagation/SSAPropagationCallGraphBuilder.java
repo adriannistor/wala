@@ -60,6 +60,7 @@ import com.ibm.wala.ssa.SSAInstruction;
 import com.ibm.wala.ssa.SSAInvokeInstruction;
 import com.ibm.wala.ssa.SSALoadMetadataInstruction;
 import com.ibm.wala.ssa.SSANewInstruction;
+import com.ibm.wala.ssa.SSANewSymbolicInstruction;
 import com.ibm.wala.ssa.SSAPhiInstruction;
 import com.ibm.wala.ssa.SSAPiInstruction;
 import com.ibm.wala.ssa.SSAPutInstruction;
@@ -598,6 +599,10 @@ public abstract class SSAPropagationCallGraphBuilder extends PropagationCallGrap
     public InstanceKey getInstanceKeyForAllocation(NewSiteReference allocation) {
       return getBuilder().getInstanceKeyForAllocation(node, allocation);
     }
+    
+    public InstanceKey getInstanceKeyForSymbolicAllocation(TypeReference type) {
+      return getBuilder().getInstanceKeyForSymbolicType(type);
+    }
 
     public InstanceKey getInstanceKeyForMultiNewArray(NewSiteReference allocation, int dim) {
       return getBuilder().getInstanceKeyForMultiNewArray(node, allocation, dim);
@@ -618,6 +623,10 @@ public abstract class SSAPropagationCallGraphBuilder extends PropagationCallGrap
 
     public CGNode getTargetForCall(CGNode caller, CallSiteReference site, IClass recv, InstanceKey iKey[]) {
       return getBuilder().getTargetForCall(caller, site, recv, iKey);
+    }
+    
+    public Set<CGNode> getTargetForSymbolicCall(CGNode caller, CallSiteReference site, IClass recv, InstanceKey iKey[]) {
+      return getBuilder().getTargetsForSymbolicCall(caller, site, recv, iKey);
     }
 
     protected boolean contentsAreInvariant(SymbolTable symbolTable, DefUse du, int valueNumber) {
@@ -856,10 +865,6 @@ public abstract class SSAPropagationCallGraphBuilder extends PropagationCallGrap
         System.err.println("visitGet " + field);
       }
 
-      // skip getfields of primitive type (optimisation)
-      if (field.getFieldType().isPrimitiveType()) {
-        return;
-      }
       PointerKey def = getPointerKeyForLocal(lval);
       assert def != null;
 
@@ -871,6 +876,23 @@ public abstract class SSAPropagationCallGraphBuilder extends PropagationCallGrap
       if (f == null) {
         return;
       }
+      
+      if(isStatic){
+        IClass klass = getClassHierarchy().lookupClass(field.getDeclaringClass());
+        if (klass == null) {
+        } else {
+          // side effect of getstatic: may call class initializer
+          if (DEBUG) {
+            System.err.println("getstatic call class init " + klass);
+          }
+          processClassInitializer(klass);
+        }
+      }
+
+      // skip getfields of primitive type (optimisation)
+      if (field.getFieldType().isPrimitiveType()) {
+        return;
+      }
 
       if (hasNoInterestingUses(lval)) {
         system.recordImplicitPointsToSet(def);
@@ -878,15 +900,6 @@ public abstract class SSAPropagationCallGraphBuilder extends PropagationCallGrap
         if (isStatic) {
           PointerKey fKey = getPointerKeyForStaticField(f);
           system.newConstraint(def, assignOperator, fKey);
-          IClass klass = getClassHierarchy().lookupClass(field.getDeclaringClass());
-          if (klass == null) {
-          } else {
-            // side effect of getstatic: may call class initializer
-            if (DEBUG) {
-              System.err.println("getstatic call class init " + klass);
-            }
-            processClassInitializer(klass);
-          }
         } else {
           PointerKey refKey = getPointerKeyForLocal(ref);
           // if (!supportFullPointerFlowGraph &&
@@ -1159,6 +1172,43 @@ public abstract class SSAPropagationCallGraphBuilder extends PropagationCallGrap
         }
       }
     }
+    
+    @Override
+    public void visitNewSymbolic(SSANewSymbolicInstruction instruction) {
+      InstanceKey iKey = getInstanceKeyForSymbolicAllocation(instruction.getTypeReference());
+      if (iKey == null) {
+        // something went wrong. I hope someone raised a warning.
+        return;
+      }
+      PointerKey def = getPointerKeyForLocal(instruction.getDef());
+      IClass klass = iKey.getConcreteType();
+
+      if (DEBUG) {
+        System.err.println("visitNewSymbolic: " + instruction + " " + iKey + " " + system.findOrCreateIndexForInstanceKey(iKey));
+      }
+
+      if (klass == null) {
+        if (DEBUG) {
+          System.err.println("Resolution failure: " + instruction);
+        }
+        return;
+      }
+
+      if (!contentsAreInvariant(symbolTable, du, instruction.getDef())) {
+        system.newConstraint(def, iKey);
+      } else {
+        system.findOrCreateIndexForInstanceKey(iKey);
+        system.recordImplicitPointsToSet(def);
+      }
+
+      // side effect of new: may call class initializer
+      if (DEBUG) {
+        System.err.println("visitNewSymbolic call clinit: " + klass);
+      }
+      processSubclassInitializers(klass);
+      for(IClass c: klass.getClassHierarchy().getImplementors(klass.getReference()))
+        processClassInitializer(c);
+    }
 
     /*
      * @see com.ibm.wala.ssa.Instruction.Visitor#visitThrow(com.ibm.wala.ssa.ThrowInstruction)
@@ -1423,6 +1473,12 @@ public abstract class SSAPropagationCallGraphBuilder extends PropagationCallGrap
       if (sc != null) {
         processClassInitializer(sc);
       }
+    }
+    
+    private void processSubclassInitializers(IClass klass) {
+      processClassInitializer(klass);
+      for (IClass subklass : klass.getClassHierarchy().getImmediateSubclasses(klass)) 
+        processSubclassInitializers(subklass);
     }
   }
 
@@ -1717,28 +1773,35 @@ public abstract class SSAPropagationCallGraphBuilder extends PropagationCallGrap
             }
           }
         }
-        CGNode target = getTargetForCall(node, call.getCallSite(), keys[0].getConcreteType(), keys);
-        if (target == null) {
-          // This indicates an error; I sure hope getTargetForCall
-          // raised a warning about this!
-          if (DEBUG) {
-            System.err.println("Warning: null target for call " + call);
-          }
+        Set<CGNode> nodeTargets;
+        if(keys[0] instanceof SymbolicTypeKey) { //TODO: add a method .isSymbolic() to InstanceKey signature
+          nodeTargets = getTargetsForSymbolicCall(node, call.getCallSite(),keys[0].getConcreteType(), keys);
         } else {
-          IntSet targets = getCallGraph().getPossibleTargetNumbers(node, call.getCallSite());
-          // even if we've seen this target before, if we have constant
-          // parameters, we may need to re-process the call, as the constraints
-          // for the first time we reached this target may not have been fully
-          // general. TODO a more refined check?
-          if (targets != null && targets.contains(target.getGraphNodeId()) && noConstParams()) {
-            // do nothing; we've previously discovered and handled this
-            // receiver for this call site.
+          nodeTargets = Collections.singleton(getTargetForCall(node, call.getCallSite(),keys[0].getConcreteType(), keys));
+        }
+        for(CGNode target: nodeTargets) {
+          if (target == null) {
+            // This indicates an error; I sure hope getTargetForCall
+            // raised a warning about this!
+            if (DEBUG) {
+              System.err.println("Warning: null target for call " + call);
+            }
           } else {
-            // process the newly discovered target for this call
-            sideEffect.b = true;
-            processResolvedCall(node, call, target, constParams, uniqueCatch);
-            if (!haveAlreadyVisited(target)) {
-              markDiscovered(target);
+            IntSet targets = getCallGraph().getPossibleTargetNumbers(node, call.getCallSite());
+            // even if we've seen this target before, if we have constant
+            // parameters, we may need to re-process the call, as the constraints
+            // for the first time we reached this target may not have been fully
+            // general. TODO a more refined check?
+            if (targets != null && targets.contains(target.getGraphNodeId()) && noConstParams()) {
+              // do nothing; we've previously discovered and handled this
+              // receiver for this call site.
+            } else {
+              // process the newly discovered target for this call
+              sideEffect.b = true;
+              processResolvedCall(node, call, target, constParams, uniqueCatch);
+              if (!haveAlreadyVisited(target)) {
+                markDiscovered(target);
+              }
             }
           }
         }
@@ -1867,10 +1930,13 @@ public abstract class SSAPropagationCallGraphBuilder extends PropagationCallGrap
         if (site.isDispatch()) {
           recv = v[0].getConcreteType();
         }
-        CGNode target = getTargetForCall(caller, site, recv, v);
-        if (target != null) {
-          targets.add(target);
-        }
+        if(recv instanceof SymbolicTypeKey) 
+          targets.addAll(getTargetsForSymbolicCall(caller, site, recv, v));
+        else {
+          CGNode target = getTargetForCall(caller, site, recv, v);
+          if (target != null) 
+            targets.add(target);
+          }
       }
     };
     iterateCrossProduct(caller, instruction, params, invs, f);

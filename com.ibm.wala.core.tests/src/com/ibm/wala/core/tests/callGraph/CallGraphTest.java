@@ -27,6 +27,7 @@ import com.ibm.wala.ipa.callgraph.AnalysisOptions;
 import com.ibm.wala.ipa.callgraph.AnalysisScope;
 import com.ibm.wala.ipa.callgraph.CGNode;
 import com.ibm.wala.ipa.callgraph.CallGraph;
+import com.ibm.wala.ipa.callgraph.CallGraphBuilder;
 import com.ibm.wala.ipa.callgraph.CallGraphStats;
 import com.ibm.wala.ipa.callgraph.Entrypoint;
 import com.ibm.wala.ipa.callgraph.impl.AllApplicationEntrypoints;
@@ -48,6 +49,8 @@ import com.ibm.wala.util.debug.Assertions;
 import com.ibm.wala.util.graph.Graph;
 import com.ibm.wala.util.graph.GraphIntegrity;
 import com.ibm.wala.util.graph.GraphIntegrity.UnsoundGraphException;
+import com.ibm.wala.util.graph.GraphPrint;
+import com.ibm.wala.util.graph.GraphUtil;
 import com.ibm.wala.util.strings.Atom;
 import com.ibm.wala.util.warnings.Warnings;
 
@@ -289,7 +292,12 @@ public class CallGraphTest extends WalaTestCase {
     // ///////////////
     // // 0-CFA /////
     // ///////////////
-    cg = CallGraphTestUtil.buildZeroCFA(options, cache, cha, scope, testPAToString);
+    CallGraphBuilder builder = Util.makeZeroCFABuilder(options, cache, cha, scope);
+    cg = builder.makeCallGraph(options, null);
+    
+    System.out.println(GraphPrint.genericToString(cg));
+    System.out.println("\n\n--------------\n\n");
+    System.out.println(GraphPrint.genericToString(builder.getPointerAnalysis().getHeapGraph()));
 
     // FIXME: annoying special cases caused by clone2assign mean using
     // the rta graph for proper graph subset checking does not work.

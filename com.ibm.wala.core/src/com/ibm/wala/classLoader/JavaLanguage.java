@@ -49,6 +49,7 @@ import com.ibm.wala.ssa.SSALoadIndirectInstruction;
 import com.ibm.wala.ssa.SSALoadMetadataInstruction;
 import com.ibm.wala.ssa.SSAMonitorInstruction;
 import com.ibm.wala.ssa.SSANewInstruction;
+import com.ibm.wala.ssa.SSANewSymbolicInstruction;
 import com.ibm.wala.ssa.SSAPhiInstruction;
 import com.ibm.wala.ssa.SSAPiInstruction;
 import com.ibm.wala.ssa.SSAPutInstruction;
@@ -247,6 +248,28 @@ public class JavaLanguage extends LanguageImpl implements BytecodeLanguage, Cons
           } else {
             return getNewScalarExceptions();
           }
+        }
+      };
+    }
+
+    public SSANewSymbolicInstruction NewSymbolicInstruction(int result, TypeReference type) {
+      return new SSANewSymbolicInstruction(result, type) {
+        @Override
+        public Collection<TypeReference> getExceptionTypes() {
+          if (getTypeReference().isArrayType()) {
+            return getNewArrayExceptions();
+          } else {
+            return getNewScalarExceptions();
+          }
+        }
+      };
+    }
+
+    public SSANewSymbolicInstruction NewSymbolicInstruction(int result, TypeReference type, int[] params) {
+      return new SSANewSymbolicInstruction(result, type, params) {
+        @Override
+        public Collection<TypeReference> getExceptionTypes() {
+          return getNewArrayExceptions();
         }
       };
     }

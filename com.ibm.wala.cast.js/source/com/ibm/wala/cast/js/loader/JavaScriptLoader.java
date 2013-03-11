@@ -100,6 +100,7 @@ import com.ibm.wala.ssa.SSALoadIndirectInstruction;
 import com.ibm.wala.ssa.SSALoadMetadataInstruction;
 import com.ibm.wala.ssa.SSAMonitorInstruction;
 import com.ibm.wala.ssa.SSANewInstruction;
+import com.ibm.wala.ssa.SSANewSymbolicInstruction;
 import com.ibm.wala.ssa.SSAPhiInstruction;
 import com.ibm.wala.ssa.SSAPiInstruction;
 import com.ibm.wala.ssa.SSAPutInstruction;
@@ -115,6 +116,7 @@ import com.ibm.wala.types.MethodReference;
 import com.ibm.wala.types.Selector;
 import com.ibm.wala.types.TypeName;
 import com.ibm.wala.types.TypeReference;
+import com.ibm.wala.types.annotations.Annotation;
 import com.ibm.wala.util.collections.HashSetFactory;
 import com.ibm.wala.util.debug.Assertions;
 import com.ibm.wala.util.strings.Atom;
@@ -529,6 +531,15 @@ public class JavaScriptLoader extends CAstAbstractModuleLoader {
           return new SetPrototype(object, prototype);
         }
 
+        @Override
+        public SSANewSymbolicInstruction NewSymbolicInstruction(int i, TypeReference type) {
+          throw new UnsupportedOperationException(); //TODO: make symbolic instructions work for js
+        }
+        
+        @Override
+        public SSANewSymbolicInstruction NewSymbolicInstruction(int i, TypeReference type, int[] params) {
+          throw new UnsupportedOperationException(); //TODO: make symbolic instructions work for js
+        }
       };
     }
 
@@ -627,6 +638,11 @@ public class JavaScriptLoader extends CAstAbstractModuleLoader {
     public IClass getSuperclass() {
       return superClass;
     }
+
+    @Override
+    public Collection<Annotation> getAnnotations() {
+      return Collections.emptySet();
+    }
   }
 
   class JavaScriptRootClass extends AstDynamicPropertyClass {
@@ -652,6 +668,11 @@ public class JavaScriptLoader extends CAstAbstractModuleLoader {
     public IClass getSuperclass() {
       return null;
     }
+    
+    @Override
+    public Collection<Annotation> getAnnotations() {
+      return Collections.emptySet();
+    }
   }
 
   class JavaScriptCodeBody extends AstFunctionClass {
@@ -676,6 +697,11 @@ public class JavaScriptLoader extends CAstAbstractModuleLoader {
       codeBody.translationContext = translationContext;
       return codeBody;
     }
+    
+    @Override
+    public Collection<Annotation> getAnnotations() {
+      return Collections.emptySet();
+    }
   }
 
   private static final Set<CAstQualifier> functionQualifiers;
@@ -693,7 +719,7 @@ public class JavaScriptLoader extends CAstAbstractModuleLoader {
     JavaScriptMethodObject(IClass cls, AbstractCFG cfg, SymbolTable symtab, boolean hasCatchBlock,
         TypeReference[][] caughtTypes, boolean hasMonitorOp, AstLexicalInformation lexicalInfo, DebuggingInformation debugInfo) {
       super(cls, functionQualifiers, cfg, symtab, AstMethodReference.fnReference(cls.getReference()), hasCatchBlock, caughtTypes,
-          hasMonitorOp, lexicalInfo, debugInfo);
+          hasMonitorOp, lexicalInfo, debugInfo, null);
 
       // force creation of these constants by calling the getter methods
       symtab.getNullConstant();
@@ -924,15 +950,5 @@ public class JavaScriptLoader extends CAstAbstractModuleLoader {
   @Override
   protected boolean shouldTranslate(CAstEntity entity) {
     return true;
-  }
-
-  @Override
-  protected void finishTranslation() {
-    Iterator<ModuleEntry> ms = getModulesWithParseErrors();
-    while (ms.hasNext()) {
-      ModuleEntry m = ms.next();
-      System.err.println(m);
-      System.err.println(getMessages(m));
-    }
   }
 }

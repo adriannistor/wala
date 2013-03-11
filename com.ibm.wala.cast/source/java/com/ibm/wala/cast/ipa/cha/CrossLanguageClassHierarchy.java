@@ -210,6 +210,10 @@ public class CrossLanguageClassHierarchy implements IClassHierarchy {
   public Collection<IClass> getImmediateSubclasses(IClass klass) {
     return getHierarchy(klass).getImmediateSubclasses(klass);
   }
+  
+  public Collection<IClass> getAllSubclasses(IClass klass) {
+    return getHierarchy(klass).getAllSubclasses(klass);
+  }
 
   public boolean isAssignableFrom(IClass c1, IClass c2) {
     return getHierarchy(c1).isAssignableFrom(c1, c2);

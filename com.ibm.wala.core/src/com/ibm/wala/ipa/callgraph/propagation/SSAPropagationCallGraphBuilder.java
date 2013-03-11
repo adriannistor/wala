@@ -1206,6 +1206,8 @@ public abstract class SSAPropagationCallGraphBuilder extends PropagationCallGrap
         System.err.println("visitNewSymbolic call clinit: " + klass);
       }
       processSubclassInitializers(klass);
+      for(IClass c: klass.getClassHierarchy().getImplementors(klass.getReference()))
+        processClassInitializer(c);
     }
 
     /*

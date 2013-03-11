@@ -1774,7 +1774,7 @@ public abstract class SSAPropagationCallGraphBuilder extends PropagationCallGrap
           }
         }
         Set<CGNode> nodeTargets;
-        if(keys[0].getConcreteType() instanceof SymbolicTypeKey) { //TODO: add a method .isSymbolic() to InstanceKey signature
+        if(keys[0] instanceof SymbolicTypeKey) { //TODO: add a method .isSymbolic() to InstanceKey signature
           nodeTargets = getTargetsForSymbolicCall(node, call.getCallSite(),keys[0].getConcreteType(), keys);
         } else {
           nodeTargets = Collections.singleton(getTargetForCall(node, call.getCallSite(),keys[0].getConcreteType(), keys));

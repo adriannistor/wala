@@ -722,6 +722,7 @@ public abstract class PropagationCallGraphBuilder implements CallGraphBuilder {
    */
   protected Set<CGNode> getTargetsForSymbolicCall(CGNode caller, CallSiteReference site, IClass recv, InstanceKey iKey[]) {
     Collection<IClass> allPossibleClasses = cha.getAllSubclasses(recv);
+    allPossibleClasses.addAll(cha.getImplementors(recv.getReference()));
     Set<IMethod> allTargets = HashSetFactory.make();
 
     for (IClass iClass : allPossibleClasses) {

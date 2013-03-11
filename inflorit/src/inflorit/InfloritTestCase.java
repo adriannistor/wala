@@ -51,6 +51,16 @@ public class InfloritTestCase extends WalaTestCase {
   }
   
   @Test
+  public void testBasic1() throws ClassHierarchyException, IllegalArgumentException, CancelException, IOException {
+    AnalysisScope scope = CallGraphTestUtil.makeJ2SEAnalysisScope("basic.txt", CallGraphTestUtil.REGRESSION_EXCLUSIONS);
+    ClassHierarchy cha = ClassHierarchy.make(scope);
+    Iterable<Entrypoint> entrypoints = makeEntryPoint(scope, cha, "Lparticle/Basic", "test1()V");
+    AnalysisOptions options = CallGraphTestUtil.makeAnalysisOptions(scope, entrypoints);
+
+    CallGraphTest.doCallGraphs(options, new AnalysisCache(), cha, scope, true);
+  }
+  
+  @Test
   public void testMain() throws ClassHierarchyException, IllegalArgumentException, CancelException, IOException {
     AnalysisScope scope = CallGraphTestUtil.makeJ2SEAnalysisScope("basic.txt", CallGraphTestUtil.REGRESSION_EXCLUSIONS);
     ClassHierarchy cha = ClassHierarchy.make(scope);

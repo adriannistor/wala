@@ -1,14 +1,20 @@
 package particle;
 
-public class Basic {
+public class Basic implements SomeInterface {
   
   Basic x;
+  
+  SomeInterface y;
   
   private void test0() {
       x.foo();
   }
+  
+  private void test1() {
+    y.foo();
+  }
 
-  private void foo() {
+  public void foo() {
     x.foo();
   }
   

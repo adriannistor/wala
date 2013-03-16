@@ -10,6 +10,8 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.ibm.wala.analysis.pointers.HeapGraph;
+import com.ibm.wala.classLoader.CallSiteReference;
+import com.ibm.wala.classLoader.IClass;
 import com.ibm.wala.classLoader.IMethod;
 import com.ibm.wala.core.tests.callGraph.CallGraphTest;
 import com.ibm.wala.core.tests.callGraph.CallGraphTestUtil;
@@ -23,6 +25,9 @@ import com.ibm.wala.ipa.callgraph.CallGraph;
 import com.ibm.wala.ipa.callgraph.CallGraphBuilder;
 import com.ibm.wala.ipa.callgraph.ContextSelector;
 import com.ibm.wala.ipa.callgraph.Entrypoint;
+import com.ibm.wala.ipa.callgraph.impl.ClassHierarchyClassTargetSelector;
+import com.ibm.wala.ipa.callgraph.impl.ClassHierarchyMethodTargetSelector;
+import com.ibm.wala.ipa.callgraph.impl.ContextInsensitiveSelector;
 import com.ibm.wala.ipa.callgraph.impl.DefaultContextSelector;
 import com.ibm.wala.ipa.callgraph.impl.DefaultEntrypoint;
 import com.ibm.wala.ipa.callgraph.impl.Util;
@@ -32,6 +37,9 @@ import com.ibm.wala.ipa.callgraph.propagation.InstanceKey;
 import com.ibm.wala.ipa.callgraph.propagation.LocalPointerKey;
 import com.ibm.wala.ipa.callgraph.propagation.PointerAnalysis;
 import com.ibm.wala.ipa.callgraph.propagation.PointerKey;
+import com.ibm.wala.ipa.callgraph.propagation.cfa.DefaultSSAInterpreter;
+import com.ibm.wala.ipa.callgraph.propagation.cfa.ZeroXCFABuilder;
+import com.ibm.wala.ipa.callgraph.propagation.cfa.ZeroXInstanceKeys;
 import com.ibm.wala.ipa.cha.ClassHierarchy;
 import com.ibm.wala.ipa.cha.ClassHierarchyException;
 import com.ibm.wala.ipa.cha.IClassHierarchy;
@@ -104,7 +112,12 @@ public class InfloritTestCase extends WalaTestCase {
     AnalysisOptions analysisOptions = CallGraphTestUtil.makeAnalysisOptions(scope, entrypoints);
     AnalysisCache analysisCache = new AnalysisCache();
 
-    CallGraphBuilder cgBuilder = Util.makeZeroCFABuilder(analysisOptions, analysisCache, cha, scope);
+    System.out.println(cha.getNumberOfClasses());
+
+//     CallGraphBuilder cgBuilder = Util.makeZeroCFABuilder(analysisOptions,
+//     analysisCache, cha, scope);
+    Util.addDefaultSelectors(analysisOptions, cha);
+    CallGraphBuilder cgBuilder = new ZeroXCFABuilder(cha, analysisOptions, analysisCache, new ContextInsensitiveSelector(), new DefaultSSAInterpreter(analysisOptions, analysisCache), ZeroXInstanceKeys.NONE);
     CallGraph callGraph = cgBuilder.makeCallGraph(analysisOptions, null);
     // System.out.println("DONE: " + callGraph.getNumberOfNodes());
     // System.out.println("GGG: " +callGraph);
@@ -143,10 +156,18 @@ public class InfloritTestCase extends WalaTestCase {
 
     AnalysisOptions analysisOptions = CallGraphTestUtil.makeAnalysisOptions(scope, entrypoints);
     AnalysisCache analysisCache = new AnalysisCache();
-    ContextSelector contextSelector = new DefaultContextSelector(analysisOptions, cha);
 
-    CallGraphBuilder cgBuilder = Util.makeVanillaZeroOneCFABuilder(analysisOptions, analysisCache, cha, scope, contextSelector,
-        null);
+    Util.addDefaultSelectors(analysisOptions, cha);
+    analysisOptions.setSelector(new ClassHierarchyMethodTargetSelector(cha) {
+      @Override
+      public IMethod getCalleeTarget(CGNode caller, CallSiteReference call, IClass receiver) {
+        if(call.getDeclaredTarget().getSelector().equals(MethodReference.clinitSelector))
+          return null;
+        return super.getCalleeTarget(caller, call, receiver);
+      }
+    });
+    analysisOptions.setSelector(new ClassHierarchyClassTargetSelector(cha));
+    CallGraphBuilder cgBuilder = new ZeroXCFABuilder(cha, analysisOptions, analysisCache, new ContextInsensitiveSelector(), new DefaultSSAInterpreter(analysisOptions, analysisCache), ZeroXInstanceKeys.ALLOCATIONS);
     CallGraph callGraph = cgBuilder.makeCallGraph(analysisOptions, null);
     // System.out.println("DONE: " + callGraph.getNumberOfNodes());
     // System.out.println("GGG: " +callGraph);
@@ -155,8 +176,8 @@ public class InfloritTestCase extends WalaTestCase {
     HeapGraph heapGraph = pointerAnalysis.getHeapGraph();
     HeapModel heapModel = heapGraph.getHeapModel();
 
-    System.out.println(GraphPrint.genericToString(callGraph));
-     System.out.println(GraphPrint.genericToString(heapGraph));
+//    System.out.println(GraphPrint.genericToString(callGraph));
+//    System.out.println(GraphPrint.genericToString(heapGraph));
 
     IMethod analyzedMethod = TestUtils.getMethod_HelperHack(cha, "particle.Circle03", "analyzeMe", "Point01");
     CGNode curMethodCGNode = TestUtils.getCGNodeONE_HelperHack(analyzedMethod, callGraph);
@@ -169,9 +190,9 @@ public class InfloritTestCase extends WalaTestCase {
 
     Set<Object> reachableNodes = DFS.getReachableNodes(heapGraph, Collections.singleton(theThisPointerKey));
 
-    for (Object object : reachableNodes) {
-      System.out.println(object);
-    }
+//    for (Object object : reachableNodes) {
+//      System.out.println(object);
+//    }
 
     TestUtils.collectReachable(theThisPointerKey, reachablePointerKeys, reachableInstanceKeys, heapGraph);
 

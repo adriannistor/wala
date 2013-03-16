@@ -117,9 +117,15 @@ public class ExplicitCallGraph extends BasicCallGraph implements BytecodeConstan
     if (context == null) {
       throw new IllegalArgumentException("null context");
     }
+    
     Key k = new Key(method, context);
     NodeImpl result = getNode(k);
     if (result == null) {
+      if(getNumberOfNodes() % 1000 == 0) {
+        System.out.println("CG: "+getNumberOfNodes());
+        System.out.println("Method: "+method);
+        System.out.println("Context: "+context);
+      }
       if (maxNumberOfNodes == -1 || getNumberOfNodes() < maxNumberOfNodes) {
         result = makeNode(method, context);
         registerNode(k, result);

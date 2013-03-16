@@ -37,7 +37,7 @@ public class CallGraphTestUtil {
     return options;
   }
 
-  public static String REGRESSION_EXCLUSIONS = "Java60RegressionExclusions.txt";
+  public static String REGRESSION_EXCLUSIONS = "Java60RegressionExclusionsOurs.txt";
 
   /**
    * should we check the heap footprint before and after CG construction?

@@ -10,6 +10,8 @@
  *******************************************************************************/
 package com.ibm.wala.ipa.callgraph.propagation;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -1012,6 +1014,15 @@ public abstract class PropagationCallGraphBuilder implements CallGraphBuilder {
           if (!representsNullType(I)) {
             PointerKey p = getPointerKeyForInstanceField(I, getField());
 
+            // handling symbolic instances
+            if(p instanceof AbstractFieldPointerKey) { // TODO: make it work for ArrayFieldKey
+              AbstractFieldPointerKey ifk = (AbstractFieldPointerKey) p;
+              if(ifk.getInstanceKey() instanceof SymbolicTypeKey) {
+                InstanceKey symbolicInstance = instanceKeyFactory.getInstanceKeyForSymbolicType(getField().getFieldTypeReference());
+                system.newConstraint(p, symbolicInstance);
+              }
+            }
+            
             if (p != null) {
               if (DEBUG_GET) {
                 String S = "Getfield add constraint " + dVal + " " + p;

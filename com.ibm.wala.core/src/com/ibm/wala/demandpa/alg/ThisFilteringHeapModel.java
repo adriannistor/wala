@@ -1,6 +1,7 @@
 package com.ibm.wala.demandpa.alg;
 
 import java.util.Iterator;
+import java.util.Set;
 
 import com.ibm.wala.classLoader.IClass;
 import com.ibm.wala.classLoader.IField;
@@ -44,7 +45,7 @@ class ThisFilteringHeapModel implements HeapModel {
     return delegate.getInstanceKeyForAllocation(node, allocation);
   }
   
-  public InstanceKey getInstanceKeyForSymbolicType(TypeReference type) {
+  public Set<InstanceKey> getInstanceKeyForSymbolicType(TypeReference type) {
     return delegate.getInstanceKeyForSymbolicType(type);
   }
 

@@ -600,7 +600,7 @@ public abstract class SSAPropagationCallGraphBuilder extends PropagationCallGrap
       return getBuilder().getInstanceKeyForAllocation(node, allocation);
     }
     
-    public InstanceKey getInstanceKeyForSymbolicAllocation(TypeReference type) {
+    public Set<InstanceKey> getInstanceKeyForSymbolicAllocation(TypeReference type) {
       return getBuilder().getInstanceKeyForSymbolicType(type);
     }
 
@@ -1171,37 +1171,28 @@ public abstract class SSAPropagationCallGraphBuilder extends PropagationCallGrap
     
     @Override
     public void visitNewSymbolic(SSANewSymbolicInstruction instruction) {
-      InstanceKey iKey = getInstanceKeyForSymbolicAllocation(instruction.getTypeReference());
-      if (iKey == null) {
-        // something went wrong. I hope someone raised a warning.
-        return;
-      }
-      PointerKey def = getPointerKeyForLocal(instruction.getDef());
-      IClass klass = iKey.getConcreteType();
-
-      if (DEBUG) {
-        System.err.println("visitNewSymbolic: " + instruction + " " + iKey + " " + system.findOrCreateIndexForInstanceKey(iKey));
-      }
-
-      if (klass == null) {
+      Set<InstanceKey> iKeys = getInstanceKeyForSymbolicAllocation(instruction.getTypeReference());
+      for (InstanceKey iKey : iKeys) {
+        PointerKey def = getPointerKeyForLocal(instruction.getDef());
+        IClass klass = iKey.getConcreteType();
+        
         if (DEBUG) {
-          System.err.println("Resolution failure: " + instruction);
+          System.err.println("visitNewSymbolic: " + instruction + " " + iKey + " " + system.findOrCreateIndexForInstanceKey(iKey));
         }
-        return;
+        
+        if (!contentsAreInvariant(symbolTable, du, instruction.getDef())) {
+          system.newConstraint(def, iKey);
+        } else {
+          system.findOrCreateIndexForInstanceKey(iKey);
+          system.recordImplicitPointsToSet(def);
+        }
+        
+        // side effect of new: may call class initializer
+        if (DEBUG) {
+          System.err.println("visitNewSymbolic call clinit: " + klass);
+        }
+        processClassInitializer(klass);
       }
-
-      if (!contentsAreInvariant(symbolTable, du, instruction.getDef())) {
-        system.newConstraint(def, iKey);
-      } else {
-        system.findOrCreateIndexForInstanceKey(iKey);
-        system.recordImplicitPointsToSet(def);
-      }
-
-      // side effect of new: may call class initializer
-      if (DEBUG) {
-        System.err.println("visitNewSymbolic call clinit: " + klass);
-      }
-      processSubclassInitializers(klass);
     }
 
     /*

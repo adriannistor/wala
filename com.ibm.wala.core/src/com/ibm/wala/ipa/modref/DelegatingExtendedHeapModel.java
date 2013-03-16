@@ -11,6 +11,7 @@
 package com.ibm.wala.ipa.modref;
 
 import java.util.Iterator;
+import java.util.Set;
 
 import com.ibm.wala.classLoader.IField;
 import com.ibm.wala.classLoader.NewSiteReference;
@@ -50,7 +51,7 @@ public class DelegatingExtendedHeapModel implements ExtendedHeapModel {
     return h.getInstanceKeyForAllocation(node, allocation);
   }
   
-  public InstanceKey getInstanceKeyForSymbolicType(TypeReference type) {
+  public Set<InstanceKey> getInstanceKeyForSymbolicType(TypeReference type) {
     return h.getInstanceKeyForSymbolicType(type);
   }
 

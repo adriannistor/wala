@@ -11,6 +11,7 @@
 package com.ibm.wala.cast.ipa.callgraph;
 
 import java.util.Map;
+import java.util.Set;
 
 import com.ibm.wala.classLoader.NewSiteReference;
 import com.ibm.wala.classLoader.ProgramCounter;
@@ -79,8 +80,8 @@ public class CrossLanguageInstanceKeys implements InstanceKeyFactory {
     return getSelector(type).getInstanceKeyForClassObject(type);
   }
   
-  public InstanceKey getInstanceKeyForSymbolicType(TypeReference type) {
-    return getSelector(type).getInstanceKeyForClassObject(type);
+  public Set<InstanceKey> getInstanceKeyForSymbolicType(TypeReference type) {
+    return getSelector(type).getInstanceKeyForSymbolicType(type);
   }
 
 }

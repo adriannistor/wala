@@ -14,6 +14,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
 import com.ibm.wala.analysis.typeInference.TypeAbstraction;
 import com.ibm.wala.analysis.typeInference.TypeInference;
@@ -201,7 +202,7 @@ public class TypeBasedHeapModel implements HeapModel {
     return iKeyFactory.getInstanceKeyForConstant(type, S);
   }
   
-  public InstanceKey getInstanceKeyForSymbolicType(TypeReference type) {
+  public Set<InstanceKey> getInstanceKeyForSymbolicType(TypeReference type) {
     return iKeyFactory.getInstanceKeyForSymbolicType(type);
   }
 

@@ -10,6 +10,8 @@
  *******************************************************************************/
 package com.ibm.wala.ipa.callgraph.propagation;
 
+import java.util.Set;
+
 import com.ibm.wala.classLoader.NewSiteReference;
 import com.ibm.wala.classLoader.ProgramCounter;
 import com.ibm.wala.ipa.callgraph.CGNode;
@@ -27,7 +29,7 @@ public interface InstanceKeyFactory {
   /**
    * @return the instance key for a symbolic allocation 
    */
-  public abstract InstanceKey getInstanceKeyForSymbolicType(TypeReference type);
+  public abstract Set<InstanceKey> getInstanceKeyForSymbolicType(TypeReference type);
   
   /**
    * @return the instance key that represents the array allocated as the dim_th

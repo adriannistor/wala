@@ -1,5 +1,7 @@
 package com.ibm.wala.cast.js.ipa.callgraph;
 
+import java.util.Set;
+
 import com.ibm.wala.classLoader.NewSiteReference;
 import com.ibm.wala.classLoader.ProgramCounter;
 import com.ibm.wala.ipa.callgraph.CGNode;
@@ -26,7 +28,7 @@ public class JavaScriptConstructorInstanceKeys implements InstanceKeyFactory {
     }
   }
 
-  public InstanceKey getInstanceKeyForSymbolicType(TypeReference type) {
+  public Set<InstanceKey> getInstanceKeyForSymbolicType(TypeReference type) {
     return base.getInstanceKeyForSymbolicType(type);
   }
 

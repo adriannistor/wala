@@ -140,17 +140,29 @@ public class PointerAnalysisImpl extends AbstractPointerAnalysis {
       if(key instanceof InstanceFieldKey) { // TODO: make it work for ArrayFieldKey
         InstanceFieldKey ifk = (InstanceFieldKey) key;
         if(ifk.getInstanceKey() instanceof SymbolicTypeKey) {
-          InstanceKey symbolicInstance = iKeyFactory.getInstanceKeyForSymbolicType(ifk.getField().getFieldTypeReference());
-          if(!pointsTo.contains(symbolicInstance)) {
-            int index = instanceKeys.getMappedIndex(symbolicInstance);
-            if(index == -1) 
-              index = instanceKeys.add(symbolicInstance);
-            v.add(index);
-          }
+          TypeReference fieldTypeReference = ifk.getField().getFieldTypeReference();
+          addSymbolicPointsTo(v, pointsTo, fieldTypeReference);
+        }
+      }
+      if(key instanceof StaticFieldKey) {
+        if(true) { //TODO: is symbolic analysis?
+          addSymbolicPointsTo(v, pointsTo, ((StaticFieldKey) key).getField().getFieldTypeReference());
         }
       }
       
       return pointsTo;
+    }
+  }
+
+  private void addSymbolicPointsTo(PointsToSetVariable v, OrdinalSet<InstanceKey> pointsTo, TypeReference fieldTypeReference) {
+    Set<InstanceKey> symbolicInstances = iKeyFactory.getInstanceKeyForSymbolicType(fieldTypeReference);
+    for (InstanceKey symbolicInstance : symbolicInstances) {            
+      if(!pointsTo.contains(symbolicInstance)) {
+        int index = instanceKeys.getMappedIndex(symbolicInstance);
+        if(index == -1) 
+          index = instanceKeys.add(symbolicInstance);
+        v.add(index);
+      }
     }
   }
 
@@ -477,7 +489,7 @@ public class PointerAnalysisImpl extends AbstractPointerAnalysis {
       return iKeyFactory.getInstanceKeyForAllocation(node, allocation);
     }
     
-    public InstanceKey getInstanceKeyForSymbolicType(TypeReference type) {
+    public Set<InstanceKey> getInstanceKeyForSymbolicType(TypeReference type) {
       return iKeyFactory.getInstanceKeyForSymbolicType(type);
     }
 

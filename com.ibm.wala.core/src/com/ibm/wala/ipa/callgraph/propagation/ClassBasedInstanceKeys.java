@@ -10,6 +10,8 @@
  *******************************************************************************/
 package com.ibm.wala.ipa.callgraph.propagation;
 
+import java.util.Set;
+
 import com.ibm.wala.classLoader.ArrayClass;
 import com.ibm.wala.classLoader.IClass;
 import com.ibm.wala.classLoader.NewSiteReference;
@@ -132,7 +134,7 @@ public class ClassBasedInstanceKeys implements InstanceKeyFactory {
 
   }
 
-  public InstanceKey getInstanceKeyForSymbolicType(TypeReference typeRef) {
+  public Set<InstanceKey> getInstanceKeyForSymbolicType(TypeReference typeRef) {
     return AllocationSiteInNodeFactory.getInstanceKeyForSymbolic(cha, typeRef);
   }
   

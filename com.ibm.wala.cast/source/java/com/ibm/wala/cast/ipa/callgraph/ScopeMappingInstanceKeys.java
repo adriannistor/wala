@@ -12,6 +12,7 @@ package com.ibm.wala.cast.ipa.callgraph;
 
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.Set;
 
 import com.ibm.wala.cast.ipa.callgraph.LexicalScopingResolverContexts.LexicalScopingResolver;
 import com.ibm.wala.cast.ir.translator.AstTranslator;
@@ -200,7 +201,7 @@ abstract public class ScopeMappingInstanceKeys implements InstanceKeyFactory {
     }
   }
   
-  public InstanceKey getInstanceKeyForSymbolicType(TypeReference type) {
+  public Set<InstanceKey> getInstanceKeyForSymbolicType(TypeReference type) {
     return basic.getInstanceKeyForSymbolicType(type);
   }
 

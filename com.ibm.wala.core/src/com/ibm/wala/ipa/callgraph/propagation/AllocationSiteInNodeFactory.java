@@ -10,6 +10,11 @@
  *******************************************************************************/
 package com.ibm.wala.ipa.callgraph.propagation;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.Set;
+
 import com.ibm.wala.classLoader.ArrayClass;
 import com.ibm.wala.classLoader.IClass;
 import com.ibm.wala.classLoader.IMethod;
@@ -23,6 +28,7 @@ import com.ibm.wala.ipa.cha.IClassHierarchy;
 import com.ibm.wala.ssa.IR;
 import com.ibm.wala.ssa.SSANewInstruction;
 import com.ibm.wala.types.TypeReference;
+import com.ibm.wala.util.collections.HashSetFactory;
 
 /**
  * A factory which tries by default to create {@link InstanceKey}s which are {@link AllocationSiteInNode}s.
@@ -94,20 +100,29 @@ public class AllocationSiteInNodeFactory implements InstanceKeyFactory {
     return key;
   }
   
-  public InstanceKey getInstanceKeyForSymbolicType(TypeReference typeRef) {
+  public Set<InstanceKey> getInstanceKeyForSymbolicType(TypeReference typeRef) {
     return AllocationSiteInNodeFactory.getInstanceKeyForSymbolic(cha, typeRef);
   }
 
-  public static InstanceKey getInstanceKeyForSymbolic(IClassHierarchy cha, TypeReference typeRef) {
+  public static Set<InstanceKey> getInstanceKeyForSymbolic(IClassHierarchy cha, TypeReference typeRef) {
     IClass type = cha.lookupClass(typeRef);
     if (type == null) {
-      return null;
+      return Collections.emptySet();
     }
 
-    // TODO: add code to disallow recursion in contexts    
-    InstanceKey key = new SymbolicTypeKey(type);
+    Collection<IClass> concreteSubclasses;
+    // TODO: add code to disallow recursion in contexts
+    if(type.isInterface())
+      concreteSubclasses = cha.getImplementors(type.getReference());
+    else
+      concreteSubclasses = cha.getAllSubclasses(type);
+    
+    Set<InstanceKey> symbolicInstances = HashSetFactory.make();
+    for (IClass iClass : concreteSubclasses) {
+      symbolicInstances.add(new SymbolicTypeKey(iClass));
+    }
 
-    return key;
+    return symbolicInstances;
   }
 
   public InstanceKey getInstanceKeyForMultiNewArray(CGNode node, NewSiteReference allocation, int dim) {

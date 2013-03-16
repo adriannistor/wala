@@ -203,7 +203,7 @@ public class ZeroXInstanceKeys implements InstanceKeyFactory {
     }
   }
   
-  public InstanceKey getInstanceKeyForSymbolicType(TypeReference type) {
+  public Set<InstanceKey> getInstanceKeyForSymbolicType(TypeReference type) {
     return classBased.getInstanceKeyForSymbolicType(type);
   }
 

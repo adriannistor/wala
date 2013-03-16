@@ -742,7 +742,7 @@ public abstract class PropagationCallGraphBuilder implements CallGraphBuilder {
     return instanceKeyFactory.getInstanceKeyForAllocation(node, allocation);
   }
 
-  public InstanceKey getInstanceKeyForSymbolicType(TypeReference type) {
+  public Set<InstanceKey> getInstanceKeyForSymbolicType(TypeReference type) {
     return instanceKeyFactory.getInstanceKeyForSymbolicType(type);
   }
 
@@ -1015,14 +1015,17 @@ public abstract class PropagationCallGraphBuilder implements CallGraphBuilder {
             PointerKey p = getPointerKeyForInstanceField(I, getField());
 
             // handling symbolic instances
-            if(p instanceof AbstractFieldPointerKey) { // TODO: make it work for ArrayFieldKey
+            if (p instanceof AbstractFieldPointerKey) { // TODO: make it work for ArrayFieldKey
               AbstractFieldPointerKey ifk = (AbstractFieldPointerKey) p;
-              if(ifk.getInstanceKey() instanceof SymbolicTypeKey) {
-                InstanceKey symbolicInstance = instanceKeyFactory.getInstanceKeyForSymbolicType(getField().getFieldTypeReference());
-                system.newConstraint(p, symbolicInstance);
+              if (ifk.getInstanceKey() instanceof SymbolicTypeKey) {
+                addForSymbolicType(p);
               }
             }
-            
+
+            if (true) // TODO: is symbolic analysis?
+              if (p instanceof StaticFieldKey)
+                addForSymbolicType(p);
+
             if (p != null) {
               if (DEBUG_GET) {
                 String S = "Getfield add constraint " + dVal + " " + p;
@@ -1030,6 +1033,13 @@ public abstract class PropagationCallGraphBuilder implements CallGraphBuilder {
               }
               sideEffect.b |= system.newFieldRead(dVal, assignOperator, p, object);
             }
+          }
+        }
+
+        private void addForSymbolicType(PointerKey p) {
+          Set<InstanceKey> symbolicInstances = instanceKeyFactory.getInstanceKeyForSymbolicType(getField().getFieldTypeReference());
+          for (InstanceKey symbolicInstance : symbolicInstances) {
+            system.newConstraint(p, symbolicInstance);
           }
         }
       };

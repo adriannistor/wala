@@ -34,7 +34,7 @@ public class FilterReceiversByMethodContextSelector implements ContextSelector {
     // this.selector = selector;
   }
 
-  public Context getCalleeTarget(CGNode caller, CallSiteReference site, IMethod callee, InstanceKey[] R) {
+  public Context getCalleeTarget(CGNode caller, CallSiteReference site, final IMethod callee, InstanceKey[] R) {
     if(site.isStatic())
       return Everywhere.EVERYWHERE;
     
@@ -42,20 +42,26 @@ public class FilterReceiversByMethodContextSelector implements ContextSelector {
       throw new IllegalArgumentException("R is null");
     }
     
-    final IMethod M = R[0].getConcreteType().getMethod(site.getDeclaredTarget().getSelector());
+//    final IMethod M = R[0].getConcreteType().getMethod(site.getDeclaredTarget().getSelector());
     
-    if(M == null)
+    if(callee == null)
       return Everywhere.EVERYWHERE; 
 
     class MethodDispatchContext implements Context {
 
+      private IMethod callee2;
+
+      public MethodDispatchContext(IMethod callee) {
+        callee2 = callee;
+      }
+      
       private IMethod getTargetMethod() {
-        return M;
+        return callee;
       }
 
       public ContextItem get(ContextKey name) {
         if (name.equals(ContextKey.PARAMETERS[0])) {
-          return new FilteredPointerKey.TargetMethodFilter(M);
+          return new FilteredPointerKey.TargetMethodFilter(callee);
         } else {
           return null;
         }
@@ -63,22 +69,21 @@ public class FilterReceiversByMethodContextSelector implements ContextSelector {
 
       @Override
       public String toString() {
-        return "DispatchContext: " + M;
+        return "DispatchContext: " + callee;
       }
 
       @Override
       public int hashCode() {
-        return M.hashCode();
+        return callee.hashCode();
       }
 
       @Override
       public boolean equals(Object o) {
-        return (o instanceof MethodDispatchContext) && ((MethodDispatchContext) o).getTargetMethod().equals(M);
+        return (o instanceof MethodDispatchContext) && ((MethodDispatchContext) o).getTargetMethod().equals(callee);
       }
     }
-    ;
 
-    return new MethodDispatchContext();
+    return new MethodDispatchContext(callee);
   }
 
   private static final IntSet thisParameter = IntSetUtil.make(new int[] { 0 });

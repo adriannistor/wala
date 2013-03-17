@@ -73,7 +73,7 @@ public class InfloritTestCase extends WalaTestCase {
         TypeName.string2TypeName(entryClass));
     MethodReference methodReference = MethodReference.findOrCreate(typeReference, Selector.make(entryMethod));
     DefaultEntrypoint defaultEntrypoint = new DefaultEntrypoint(methodReference, cha);
-    defaultEntrypoint.makeSymbolicParameter(0);
+    defaultEntrypoint.makeSymbolicParameter(0, Collections.singleton(typeReference));
     return Collections.singleton((Entrypoint) defaultEntrypoint);
   }
 

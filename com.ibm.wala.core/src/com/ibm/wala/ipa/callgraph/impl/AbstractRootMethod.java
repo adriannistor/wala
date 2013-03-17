@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
 import com.ibm.wala.cfg.InducedCFG;
 import com.ibm.wala.classLoader.ArrayClass;
@@ -195,6 +196,7 @@ public abstract class AbstractRootMethod extends SyntheticMethod {
   
   /**
    * Add a New statement of the given type
+   * @param isSymbolicParameter 
    * 
    * @return instruction added, or null
    * @throws IllegalArgumentException if T is null

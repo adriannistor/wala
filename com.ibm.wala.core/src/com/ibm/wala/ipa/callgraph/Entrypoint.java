@@ -10,7 +10,12 @@
  *******************************************************************************/
 package com.ibm.wala.ipa.callgraph;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 import com.ibm.wala.analysis.typeInference.ConeType;
 import com.ibm.wala.analysis.typeInference.PrimitiveType;
@@ -27,6 +32,7 @@ import com.ibm.wala.ssa.SSAInstruction;
 import com.ibm.wala.ssa.SSANewInstruction;
 import com.ibm.wala.types.MethodReference;
 import com.ibm.wala.types.TypeReference;
+import com.ibm.wala.util.collections.HashSetFactory;
 import com.ibm.wala.util.debug.Assertions;
 
 /**
@@ -39,7 +45,7 @@ public abstract class Entrypoint implements BytecodeConstants {
    */
   protected final IMethod method;
 
-  protected boolean[] isSymbolicParameter;
+  protected Collection[] isSymbolicParameter;
 
   /**
    * @param method the method to be called for this entrypoint
@@ -49,7 +55,7 @@ public abstract class Entrypoint implements BytecodeConstants {
       throw new IllegalArgumentException("method is null");
     }
     this.method = method;
-    this.isSymbolicParameter = new boolean[method.getNumberOfParameters()];
+    this.isSymbolicParameter = new Collection[method.getNumberOfParameters()];
     assert method.getDeclaringClass() != null : "null declaring class";
   }
 
@@ -61,7 +67,7 @@ public abstract class Entrypoint implements BytecodeConstants {
     if (m == null) {
       Assertions.UNREACHABLE("could not resolve " + method);
     }
-    this.isSymbolicParameter = new boolean[m.getNumberOfParameters()];
+    this.isSymbolicParameter = new Collection[m.getNumberOfParameters()];
     this.method = m;
   }
 
@@ -100,31 +106,34 @@ public abstract class Entrypoint implements BytecodeConstants {
    */
   protected int makeArgument(AbstractRootMethod m, int i) {
     TypeReference[] p = getParameterTypes(i);
+    ArrayList<Integer> arrayList = new ArrayList<Integer>();
     if (p.length == 0) {
       return -1;
     } else if (p.length == 1) {
       if (p[0].isPrimitiveType()) {
         return m.addLocal();
       } else {
-        SSAInstruction n = makeAllocation(m, i, p[0]);
-        return (n == null) ? -1 : n.getDef();
+        Collection<SSAInstruction> ns = makeAllocation(m, i, p[0]);
+        for (SSAInstruction n : ns)
+          if (n != null)
+            arrayList.add(n.getDef());
+
+        int[] value = new int[arrayList.size()];
+        for (i = 0; i < arrayList.size(); i++) {
+          value[i] = arrayList.get(i);
+        }
+        if(value.length > 0)
+          return m.addPhi(value);
+        else 
+          return -1;
       }
     } else {
-      int[] values = new int[p.length];
       int countErrors = 0;
       for (int j = 0; j < p.length; j++) {
-        SSAInstruction n = makeAllocation(m, i, p[j]);
-        int value = (n == null) ? -1 : n.getDef();
-        if (value == -1) {
-          countErrors++;
-        } else {
-          values[j - countErrors] = value;
-        }
-      }
-      if (countErrors > 0) {
-        int[] oldValues = values;
-        values = new int[oldValues.length - countErrors];
-        System.arraycopy(oldValues, 0, values, 0, values.length);
+        Collection<SSAInstruction> ns = makeAllocation(m, i, p[0]);
+        for (SSAInstruction n : ns)
+          if (n != null && n.getDef() != -1)
+            arrayList.add(n.getDef());
       }
 
       TypeAbstraction a;
@@ -143,19 +152,27 @@ public abstract class Entrypoint implements BytecodeConstants {
         }
       }
 
-      return m.addPhi(values);
+      int[] value = new int[arrayList.size()];
+      for (i = 0; i < arrayList.size(); i++) {
+        value[i] = arrayList.get(i);
+      }
+
+      return m.addPhi(value);
     }
   }
 
-  private SSAInstruction makeAllocation(AbstractRootMethod m, int i, TypeReference t) {
-    if (isSymbolicParameter[i])
-      return m.addSymbolicAllocation(t);
-    else
-      return m.addAllocation(t);
+  private Collection<SSAInstruction> makeAllocation(AbstractRootMethod m, int i, TypeReference t) {
+    if (isSymbolicParameter[i] != null) {
+      HashSet<SSAInstruction> make = HashSetFactory.make();
+      for (Object x : isSymbolicParameter[i])
+        make.add(m.addSymbolicAllocation((TypeReference) x));
+      return make;
+    } else
+      return Collections.singleton((SSAInstruction) m.addAllocation(t));
   }
 
-  public void makeSymbolicParameter(int i) {
-    isSymbolicParameter[i] = true;
+  public void makeSymbolicParameter(int i, Set<TypeReference> types) {
+    isSymbolicParameter[i] = types;
   }
 
   @Override

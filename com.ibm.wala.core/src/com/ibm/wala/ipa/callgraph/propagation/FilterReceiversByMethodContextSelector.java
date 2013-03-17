@@ -35,13 +35,12 @@ public class FilterReceiversByMethodContextSelector implements ContextSelector {
   }
 
   public Context getCalleeTarget(CGNode caller, CallSiteReference site, IMethod callee, InstanceKey[] R) {
-    if (R == null || R[0] == null) {
-      throw new IllegalArgumentException("R is null");
-    }
-
     if(site.isStatic())
       return Everywhere.EVERYWHERE;
     
+    if (R == null || R[0] == null) {
+      throw new IllegalArgumentException("R is null");
+    }
     
     final IMethod M = R[0].getConcreteType().getMethod(site.getDeclaredTarget().getSelector());
     

@@ -117,11 +117,11 @@ public class InfloritTestCase extends WalaTestCase {
     AnalysisCache analysisCache = new AnalysisCache();
 
     System.out.println(cha.getNumberOfClasses());
-
+    CallGraphBuilder cgBuilder = new ZeroXCFABuilder(cha, analysisOptions, analysisCache, new ContextInsensitiveSelector(), new DefaultSSAInterpreter(analysisOptions, analysisCache), ZeroXInstanceKeys.ALLOCATIONS);
+    
 //     CallGraphBuilder cgBuilder = Util.makeZeroCFABuilder(analysisOptions,
 //     analysisCache, cha, scope);
     Util.addDefaultSelectors(analysisOptions, cha);
-    CallGraphBuilder cgBuilder = new ZeroXCFABuilder(cha, analysisOptions, analysisCache, new ContextInsensitiveSelector(), new DefaultSSAInterpreter(analysisOptions, analysisCache), ZeroXInstanceKeys.NONE);
     CallGraph callGraph = cgBuilder.makeCallGraph(analysisOptions, null);
     // System.out.println("DONE: " + callGraph.getNumberOfNodes());
     // System.out.println("GGG: " +callGraph);
@@ -233,7 +233,7 @@ public class InfloritTestCase extends WalaTestCase {
       }
     });
     analysisOptions.setSelector(new ClassHierarchyClassTargetSelector(cha));
-    CallGraphBuilder cgBuilder = new ZeroXCFABuilder(cha, analysisOptions, analysisCache, new FilterReceiversByMethodContextSelector(cha), new DefaultSSAInterpreter(analysisOptions, analysisCache), ZeroXInstanceKeys.ALLOCATIONS);
+    CallGraphBuilder cgBuilder = new ZeroXCFABuilder(cha, analysisOptions, analysisCache, new ContextInsensitiveSelector(), new DefaultSSAInterpreter(analysisOptions, analysisCache), ZeroXInstanceKeys.ALLOCATIONS);
     CallGraph callGraph = cgBuilder.makeCallGraph(analysisOptions, null);
     // System.out.println("DONE: " + callGraph.getNumberOfNodes());
     // System.out.println("GGG: " +callGraph);

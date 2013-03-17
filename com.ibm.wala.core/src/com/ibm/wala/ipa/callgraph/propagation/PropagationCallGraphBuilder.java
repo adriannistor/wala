@@ -306,7 +306,8 @@ public abstract class PropagationCallGraphBuilder implements CallGraphBuilder {
 
   /**
    * Add constraints for a node.
-   * @param monitor 
+   * 
+   * @param monitor
    * 
    * @return true iff any new constraints are added.
    */
@@ -317,7 +318,7 @@ public abstract class PropagationCallGraphBuilder implements CallGraphBuilder {
    * iterative.
    * 
    * @return true iff any new constraints are added.
-   * @throws CancelException 
+   * @throws CancelException
    */
   protected boolean addConstraintsFromNewNodes(IProgressMonitor monitor) throws CancelException {
     boolean result = false;
@@ -704,7 +705,7 @@ public abstract class PropagationCallGraphBuilder implements CallGraphBuilder {
       return null;
     }
     Context targetContext = contextSelector.getCalleeTarget(caller, site, targetMethod, iKey);
-    
+
     if (targetContext instanceof IllegalArgumentExceptionContext) {
       return null;
     }
@@ -714,7 +715,7 @@ public abstract class PropagationCallGraphBuilder implements CallGraphBuilder {
       return null;
     }
   }
-  
+
   /**
    * @return the context selector for this call graph builder
    */
@@ -748,8 +749,8 @@ public abstract class PropagationCallGraphBuilder implements CallGraphBuilder {
 
   /**
    * @param dim the dimension of the array whose instance we would like to model. dim == 0 represents the first dimension, e.g., the
-   *          [Object; instances in [[Object; e.g., the [[Object; instances in [[[Object; dim == 1 represents the second dimension,
-   *          e.g., the [Object instances in [[[Object;
+   *        [Object; instances in [[Object; e.g., the [[Object; instances in [[[Object; dim == 1 represents the second dimension,
+   *        e.g., the [Object instances in [[[Object;
    * @return the InstanceKey that acts as a representative for the class of array contents objects that includes objects allocated
    *         at the given new instruction in the given node
    */
@@ -1037,7 +1038,13 @@ public abstract class PropagationCallGraphBuilder implements CallGraphBuilder {
         }
 
         private void addForSymbolicType(PointerKey p) {
-          Set<InstanceKey> symbolicInstances = instanceKeyFactory.getInstancesKeyForSymbolicType(getField().getFieldTypeReference());
+          Set<InstanceKey> symbolicInstances = instanceKeyFactory
+              .getInstancesKeyForSymbolicType(getField().getFieldTypeReference());
+//          Iterator<InstanceKey> iterator = symbolicInstances.iterator();
+//          for (int i = 0; i < 10000 /*Integer.parseInt(System.getProperty("SYMBOLIC_K")) */ && iterator.hasNext(); i++) {
+//            InstanceKey symbolicInstance = iterator.next();
+//            system.newConstraint(p, symbolicInstance);
+//          }
           for (InstanceKey symbolicInstance : symbolicInstances) {
             system.newConstraint(p, symbolicInstance);
           }
@@ -1466,8 +1473,9 @@ public abstract class PropagationCallGraphBuilder implements CallGraphBuilder {
 
   /**
    * Add constraints when the interpretation of a node changes (e.g. reflection)
-   * @param monitor 
-   * @throws CancelException 
+   * 
+   * @param monitor
+   * @throws CancelException
    */
   public void addConstraintsFromChangedNode(CGNode node, IProgressMonitor monitor) throws CancelException {
     unconditionallyAddConstraintsFromNode(node, monitor);

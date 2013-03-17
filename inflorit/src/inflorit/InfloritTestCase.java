@@ -24,19 +24,23 @@ import com.ibm.wala.ipa.callgraph.CGNode;
 import com.ibm.wala.ipa.callgraph.CallGraph;
 import com.ibm.wala.ipa.callgraph.CallGraphBuilder;
 import com.ibm.wala.ipa.callgraph.ContextSelector;
+import com.ibm.wala.ipa.callgraph.DelegatingContext;
 import com.ibm.wala.ipa.callgraph.Entrypoint;
 import com.ibm.wala.ipa.callgraph.impl.ClassHierarchyClassTargetSelector;
 import com.ibm.wala.ipa.callgraph.impl.ClassHierarchyMethodTargetSelector;
 import com.ibm.wala.ipa.callgraph.impl.ContextInsensitiveSelector;
 import com.ibm.wala.ipa.callgraph.impl.DefaultContextSelector;
 import com.ibm.wala.ipa.callgraph.impl.DefaultEntrypoint;
+import com.ibm.wala.ipa.callgraph.impl.DelegatingContextSelector;
 import com.ibm.wala.ipa.callgraph.impl.Util;
+import com.ibm.wala.ipa.callgraph.propagation.FilterReceiversByMethodContextSelector;
 import com.ibm.wala.ipa.callgraph.propagation.HeapModel;
 import com.ibm.wala.ipa.callgraph.propagation.InstanceFieldKey;
 import com.ibm.wala.ipa.callgraph.propagation.InstanceKey;
 import com.ibm.wala.ipa.callgraph.propagation.LocalPointerKey;
 import com.ibm.wala.ipa.callgraph.propagation.PointerAnalysis;
 import com.ibm.wala.ipa.callgraph.propagation.PointerKey;
+import com.ibm.wala.ipa.callgraph.propagation.TargetMethodContextSelector;
 import com.ibm.wala.ipa.callgraph.propagation.cfa.DefaultSSAInterpreter;
 import com.ibm.wala.ipa.callgraph.propagation.cfa.ZeroXCFABuilder;
 import com.ibm.wala.ipa.callgraph.propagation.cfa.ZeroXInstanceKeys;
@@ -208,5 +212,68 @@ public class InfloritTestCase extends WalaTestCase {
     }
     Assert.assertTrue("field elementData in ArrayList should be reachable", foundFiled);
   }
+  
+
+  @Test
+  public void testCircle04() throws ClassHierarchyException, IllegalArgumentException, CancelException, IOException {
+    AnalysisScope scope = CallGraphTestUtil.makeJ2SEAnalysisScope("basic.txt", CallGraphTestUtil.REGRESSION_EXCLUSIONS);
+    ClassHierarchy cha = ClassHierarchy.make(scope);
+    Iterable<Entrypoint> entrypoints = makeEntryPoint(scope, cha, "Lparticle/Circle04", "analyzeMe()V");
+
+    AnalysisOptions analysisOptions = CallGraphTestUtil.makeAnalysisOptions(scope, entrypoints);
+    AnalysisCache analysisCache = new AnalysisCache();
+
+    Util.addDefaultSelectors(analysisOptions, cha);
+    analysisOptions.setSelector(new ClassHierarchyMethodTargetSelector(cha) {
+      @Override
+      public IMethod getCalleeTarget(CGNode caller, CallSiteReference call, IClass receiver) {
+        if(call.getDeclaredTarget().getSelector().equals(MethodReference.clinitSelector))
+          return null;
+        return super.getCalleeTarget(caller, call, receiver);
+      }
+    });
+    analysisOptions.setSelector(new ClassHierarchyClassTargetSelector(cha));
+    CallGraphBuilder cgBuilder = new ZeroXCFABuilder(cha, analysisOptions, analysisCache, new FilterReceiversByMethodContextSelector(cha), new DefaultSSAInterpreter(analysisOptions, analysisCache), ZeroXInstanceKeys.ALLOCATIONS);
+    CallGraph callGraph = cgBuilder.makeCallGraph(analysisOptions, null);
+    // System.out.println("DONE: " + callGraph.getNumberOfNodes());
+    // System.out.println("GGG: " +callGraph);
+
+    PointerAnalysis pointerAnalysis = cgBuilder.getPointerAnalysis();
+    HeapGraph heapGraph = pointerAnalysis.getHeapGraph();
+    HeapModel heapModel = heapGraph.getHeapModel();
+
+//    System.out.println(GraphPrint.genericToString(callGraph));
+//    System.out.println(GraphPrint.genericToString(heapGraph));
+
+    IMethod analyzedMethod = TestUtils.getMethod_HelperHack(cha, "particle.Circle04", "analyzeMe");
+    CGNode curMethodCGNode = TestUtils.getCGNodeONE_HelperHack(analyzedMethod, callGraph);
+    Object theThisPointerKey = heapModel.getPointerKeyForLocal(curMethodCGNode, 1);
+
+    System.out.println("YY: " + theThisPointerKey);
+
+    HashSet<PointerKey> reachablePointerKeys = new HashSet<PointerKey>();
+    HashSet<InstanceKey> reachableInstanceKeys = new HashSet<InstanceKey>();
+
+    Set<Object> reachableNodes = DFS.getReachableNodes(heapGraph, Collections.singleton(theThisPointerKey));
+
+    for (Object object : reachableNodes) {
+      System.out.println("REACHnode: "+object);
+    }
+
+    TestUtils.collectReachable(theThisPointerKey, reachablePointerKeys, reachableInstanceKeys, heapGraph);
+
+    boolean foundFiled = false;
+    for (PointerKey pk : reachablePointerKeys) {
+      System.out.println("REACHpk: " + pk);
+      if (pk instanceof InstanceFieldKey) {
+        InstanceFieldKey ifk = (InstanceFieldKey) pk;
+        if (ifk.getField().getName().toString().contains("pField")) {
+          foundFiled = true;
+        }
+      }
+    }
+    Assert.assertTrue("when called from Circle04, I should NOT find any pField!!!", !foundFiled);
+  }
+
 
 }

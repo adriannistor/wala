@@ -202,8 +202,8 @@ public class TypeBasedHeapModel implements HeapModel {
     return iKeyFactory.getInstanceKeyForConstant(type, S);
   }
   
-  public Set<InstanceKey> getInstanceKeyForSymbolicType(TypeReference type) {
-    return iKeyFactory.getInstanceKeyForSymbolicType(type);
+  public Set<InstanceKey> getInstancesKeyForSymbolicType(TypeReference type) {
+    return iKeyFactory.getInstancesKeyForSymbolicType(type);
   }
 
   public String getStringConstantForInstanceKey(InstanceKey I) throws UnimplementedError {

@@ -742,8 +742,8 @@ public abstract class PropagationCallGraphBuilder implements CallGraphBuilder {
     return instanceKeyFactory.getInstanceKeyForAllocation(node, allocation);
   }
 
-  public Set<InstanceKey> getInstanceKeyForSymbolicType(TypeReference type) {
-    return instanceKeyFactory.getInstanceKeyForSymbolicType(type);
+  public Set<InstanceKey> getInstancesKeyForSymbolicType(TypeReference type) {
+    return instanceKeyFactory.getInstancesKeyForSymbolicType(type);
   }
 
   /**
@@ -1037,7 +1037,7 @@ public abstract class PropagationCallGraphBuilder implements CallGraphBuilder {
         }
 
         private void addForSymbolicType(PointerKey p) {
-          Set<InstanceKey> symbolicInstances = instanceKeyFactory.getInstanceKeyForSymbolicType(getField().getFieldTypeReference());
+          Set<InstanceKey> symbolicInstances = instanceKeyFactory.getInstancesKeyForSymbolicType(getField().getFieldTypeReference());
           for (InstanceKey symbolicInstance : symbolicInstances) {
             system.newConstraint(p, symbolicInstance);
           }

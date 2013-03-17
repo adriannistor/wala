@@ -601,7 +601,7 @@ public abstract class SSAPropagationCallGraphBuilder extends PropagationCallGrap
     }
     
     public Set<InstanceKey> getInstanceKeyForSymbolicAllocation(TypeReference type) {
-      return getBuilder().getInstanceKeyForSymbolicType(type);
+      return getBuilder().getInstancesKeyForSymbolicType(type);
     }
 
     public InstanceKey getInstanceKeyForMultiNewArray(NewSiteReference allocation, int dim) {

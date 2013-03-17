@@ -201,8 +201,8 @@ abstract public class ScopeMappingInstanceKeys implements InstanceKeyFactory {
     }
   }
   
-  public Set<InstanceKey> getInstanceKeyForSymbolicType(TypeReference type) {
-    return basic.getInstanceKeyForSymbolicType(type);
+  public Set<InstanceKey> getInstancesKeyForSymbolicType(TypeReference type) {
+    return basic.getInstancesKeyForSymbolicType(type);
   }
 
   /**

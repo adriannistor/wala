@@ -28,8 +28,8 @@ public class JavaScriptConstructorInstanceKeys implements InstanceKeyFactory {
     }
   }
 
-  public Set<InstanceKey> getInstanceKeyForSymbolicType(TypeReference type) {
-    return base.getInstanceKeyForSymbolicType(type);
+  public Set<InstanceKey> getInstancesKeyForSymbolicType(TypeReference type) {
+    return base.getInstancesKeyForSymbolicType(type);
   }
 
   public InstanceKey getInstanceKeyForClassObject(TypeReference type) {

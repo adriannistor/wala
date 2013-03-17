@@ -80,8 +80,8 @@ public class CrossLanguageInstanceKeys implements InstanceKeyFactory {
     return getSelector(type).getInstanceKeyForClassObject(type);
   }
   
-  public Set<InstanceKey> getInstanceKeyForSymbolicType(TypeReference type) {
-    return getSelector(type).getInstanceKeyForSymbolicType(type);
+  public Set<InstanceKey> getInstancesKeyForSymbolicType(TypeReference type) {
+    return getSelector(type).getInstancesKeyForSymbolicType(type);
   }
 
 }

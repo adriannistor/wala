@@ -100,7 +100,7 @@ public class AllocationSiteInNodeFactory implements InstanceKeyFactory {
     return key;
   }
   
-  public Set<InstanceKey> getInstanceKeyForSymbolicType(TypeReference typeRef) {
+  public Set<InstanceKey> getInstancesKeyForSymbolicType(TypeReference typeRef) {
     return AllocationSiteInNodeFactory.getInstanceKeyForSymbolic(cha, typeRef);
   }
 

@@ -45,8 +45,8 @@ class ThisFilteringHeapModel implements HeapModel {
     return delegate.getInstanceKeyForAllocation(node, allocation);
   }
   
-  public Set<InstanceKey> getInstanceKeyForSymbolicType(TypeReference type) {
-    return delegate.getInstanceKeyForSymbolicType(type);
+  public Set<InstanceKey> getInstancesKeyForSymbolicType(TypeReference type) {
+    return delegate.getInstancesKeyForSymbolicType(type);
   }
 
   public InstanceKey getInstanceKeyForClassObject(TypeReference type) {

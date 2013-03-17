@@ -155,7 +155,7 @@ public class PointerAnalysisImpl extends AbstractPointerAnalysis {
   }
 
   private void addSymbolicPointsTo(PointsToSetVariable v, OrdinalSet<InstanceKey> pointsTo, TypeReference fieldTypeReference) {
-    Set<InstanceKey> symbolicInstances = iKeyFactory.getInstanceKeyForSymbolicType(fieldTypeReference);
+    Set<InstanceKey> symbolicInstances = iKeyFactory.getInstancesKeyForSymbolicType(fieldTypeReference);
     for (InstanceKey symbolicInstance : symbolicInstances) {            
       if(!pointsTo.contains(symbolicInstance)) {
         int index = instanceKeys.getMappedIndex(symbolicInstance);
@@ -489,8 +489,8 @@ public class PointerAnalysisImpl extends AbstractPointerAnalysis {
       return iKeyFactory.getInstanceKeyForAllocation(node, allocation);
     }
     
-    public Set<InstanceKey> getInstanceKeyForSymbolicType(TypeReference type) {
-      return iKeyFactory.getInstanceKeyForSymbolicType(type);
+    public Set<InstanceKey> getInstancesKeyForSymbolicType(TypeReference type) {
+      return iKeyFactory.getInstancesKeyForSymbolicType(type);
     }
 
     public InstanceKey getInstanceKeyForMultiNewArray(CGNode node, NewSiteReference allocation, int dim) {

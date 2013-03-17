@@ -29,7 +29,7 @@ public interface InstanceKeyFactory {
   /**
    * @return the instance key for a symbolic allocation 
    */
-  public abstract Set<InstanceKey> getInstanceKeyForSymbolicType(TypeReference type);
+  public abstract Set<InstanceKey> getInstancesKeyForSymbolicType(TypeReference type);
   
   /**
    * @return the instance key that represents the array allocated as the dim_th

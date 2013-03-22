@@ -72,7 +72,7 @@ public class AllocationSiteInNodeFactory implements InstanceKeyFactory {
     }
 
     CGNode nodeToUse = node;
-    
+
     // disallow recursion in contexts.
     if (node.getContext() instanceof ReceiverInstanceContext || node.getContext() instanceof CallerContext) {
       IMethod m = node.getMethod();
@@ -92,14 +92,14 @@ public class AllocationSiteInNodeFactory implements InstanceKeyFactory {
         if (c.intValue() == 0) {
           return new ZeroLengthArrayInNode(nodeToUse, allocation, type);
         }
-      }     
+      }
     }
-    
+
     InstanceKey key = new NormalAllocationInNode(nodeToUse, allocation, type);
 
     return key;
   }
-  
+
   public Set<InstanceKey> getInstancesKeyForSymbolicType(TypeReference typeRef) {
     return AllocationSiteInNodeFactory.getInstanceKeyForSymbolic(cha, typeRef);
   }
@@ -112,13 +112,16 @@ public class AllocationSiteInNodeFactory implements InstanceKeyFactory {
 
     Collection<IClass> concreteSubclasses;
     // TODO: add code to disallow recursion in contexts
-    if(type.isInterface())
+    if (type.isInterface())
       concreteSubclasses = cha.getImplementors(type.getReference());
     else
       concreteSubclasses = cha.getAllSubclasses(type);
-    
+
+    Iterator<IClass> iterator = concreteSubclasses.iterator();
     Set<InstanceKey> symbolicInstances = HashSetFactory.make();
-    for (IClass iClass : concreteSubclasses) {
+//     for (IClass iClass : concreteSubclasses) {
+    for (int i = 0; i < 1000 && iterator.hasNext(); i++) {
+      IClass iClass = iterator.next();
       symbolicInstances.add(new SymbolicTypeKey(iClass));
     }
 

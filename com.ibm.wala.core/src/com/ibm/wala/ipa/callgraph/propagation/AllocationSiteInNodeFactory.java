@@ -119,8 +119,10 @@ public class AllocationSiteInNodeFactory implements InstanceKeyFactory {
 
     Iterator<IClass> iterator = concreteSubclasses.iterator();
     Set<InstanceKey> symbolicInstances = HashSetFactory.make();
+    //__ADI__C this controls how many subclasses
+    //      BUT also (??) method addForSymbolicType() in file PropagationCallGraphBuilder.java (the actual class is some inner stuff)
 //     for (IClass iClass : concreteSubclasses) {
-    for (int i = 0; i < 1000 && iterator.hasNext(); i++) {
+    for (int i = 0; i < 4 && iterator.hasNext(); i++) {
       IClass iClass = iterator.next();
       symbolicInstances.add(new SymbolicTypeKey(iClass));
     }

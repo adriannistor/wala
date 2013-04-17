@@ -69,7 +69,7 @@ public class ReferenceCleanser {
     }
     AnalysisCache cache = getAnalysisCache();
     if (cache != null) {
-      cache.getSSACache().wipe();
+//      cache.getSSACache().wipe(); // __ADI__ disabling caching from COSMIN
     }
     IClassHierarchy cha = getClassHierarchy();
     if (cha != null) {

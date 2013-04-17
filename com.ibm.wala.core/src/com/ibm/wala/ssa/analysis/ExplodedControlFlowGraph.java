@@ -572,7 +572,15 @@ public class ExplodedControlFlowGraph implements ControlFlowGraph<SSAInstruction
       if (isExitBlock()) {
         return "ExplodedBlock[" + getNumber() + "](exit:" + getMethod() + ")";
       }
-      return "ExplodedBlock[" + getNumber() + "](original:" + original + ")";
+      String phiRes = "";
+      for (Iterator it = this.iteratePhis(); it.hasNext();) {
+        SSAPhiInstruction phi = (SSAPhiInstruction) it.next();
+        if (phi != null) {
+          phiRes += "           " + phi.toString() + "\n";
+        }
+      }
+      return "ExplodedBlock[" + getNumber() + "](original:" + original + " INS: " +getInstruction() + 
+         (phiRes !=""? " PHI"+phiRes:"")+")";
     }
   }
 

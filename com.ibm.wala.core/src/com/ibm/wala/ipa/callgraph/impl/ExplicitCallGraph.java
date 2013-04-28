@@ -108,6 +108,12 @@ public class ExplicitCallGraph extends BasicCallGraph implements BytecodeConstan
   }
 
   /**
+   * @short throw this when you have too many nodes and you want to give up
+   * */
+  public class ExceptionTooManyNodes_ADI extends RuntimeException {
+    
+  }
+  /**
    */
   @Override
   public CGNode findOrCreateNode(IMethod method, Context context) throws CancelException {
@@ -122,6 +128,9 @@ public class ExplicitCallGraph extends BasicCallGraph implements BytecodeConstan
     NodeImpl result = getNode(k);
     if (result == null) {
       if(getNumberOfNodes() % 1000 == 0) {
+        if (getNumberOfNodes()>9998) {
+          throw new ExceptionTooManyNodes_ADI();
+        }
         System.out.println("CG: "+getNumberOfNodes());
         System.out.println("Method: "+method);
         System.out.println("Context: "+context);

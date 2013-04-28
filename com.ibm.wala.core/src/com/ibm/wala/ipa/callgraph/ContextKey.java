@@ -18,13 +18,13 @@ public interface ContextKey {
   /**
    * A property of contexts that might be generally useful: the "caller" method ... used for call-string context schemes.
    */
-  public final static ContextKey CALLER = new ContextKey() {
+  public final static ContextKey CALLER = new ContextKey() {@Override public String toString() {return "CALLER";}
   };
 
   /**
    * A property of contexts that might be generally useful: the "call site" method ... used for call-string context schemes.
    */
-  public final static ContextKey CALLSITE = new ContextKey() {
+  public final static ContextKey CALLSITE = new ContextKey() {@Override public String toString() {return "CALLSITE";}
   };
 
   /**
@@ -33,7 +33,7 @@ public interface ContextKey {
    * 
    * Known implementations (ContextItems) for RECEIVER include TypeAbstraction and InstanceKey
    */
-  public final static ContextKey RECEIVER = new ContextKey() {
+  public final static ContextKey RECEIVER = new ContextKey() {@Override public String toString() {return "RECEIVER";}
   };
 
   /**

@@ -593,8 +593,10 @@ public class SSACFG implements ControlFlowGraph<SSAInstruction, ISSABasicBlock> 
      */
     @Override
     public String toString() {
-      return "BB[SSA:" + getFirstInstructionIndex() + ".." + getLastInstructionIndex() + "]" + getNumber() + " - "
-          + method.getSignature();
+//      return "BB[SSA:" + getFirstInstructionIndex() + ".." + getLastInstructionIndex() + "]" + getNumber() + " - "
+//          + method.getSignature();
+      return "BB"+getNumber()+"[SSA:" + getFirstInstructionIndex() + ".." + getLastInstructionIndex() + "]" +  " - "
+      + method.getSignature();
     }
 
     private SSACFG getGraph() {

@@ -262,5 +262,6 @@ public abstract class SSAInstruction {
   @Override
   public final boolean equals(Object obj) {
     return this == obj;
+    //return this.toString().equals(obj.toString()); //__ADI__
   }
 }

@@ -145,7 +145,7 @@ public class PointerAnalysisImpl extends AbstractPointerAnalysis {
           addSymbolicPointsTo(v, pointsTo, fieldTypeReference);
         }
       }
-      if(key instanceof ArrayContentsKey) {
+      if(key instanceof ArrayContentsKey) { // __ADI__C
         ArrayContentsKey arrCont = (ArrayContentsKey) key;
         if(arrCont.getInstanceKey() instanceof SymbolicTypeKey) {
           TypeReference fieldTypeReference = ((ArrayClass)arrCont.getInstanceKey().getConcreteType()).getElementClass().getReference(); 

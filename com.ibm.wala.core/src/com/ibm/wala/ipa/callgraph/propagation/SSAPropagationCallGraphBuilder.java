@@ -649,8 +649,8 @@ public abstract class SSAPropagationCallGraphBuilder extends PropagationCallGrap
     }
 
     protected boolean hasNoInterestingUses(int vn) {
-      return false;
-//      return getBuilder().hasNoInterestingUses(node, vn, du);
+      return false; // __ADI__C disables
+      //return getBuilder().hasNoInterestingUses(node, vn, du);
     }
 
     protected boolean isRootType(IClass klass) {

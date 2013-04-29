@@ -279,6 +279,13 @@ public class InfloritTestCase extends WalaTestCase {
     System.out.println(result.snd);
     System.out.println(result.fst);
   }
+  
+  @Test
+  public void testVisualize09Circle02_2() throws ClassHierarchyException, IllegalArgumentException, CancelException, IOException {
+    Pair<HeapGraph, CallGraph> result = analyzeFor("Lvisualize09/Circle02", "analyzeMe2()V");
+    System.out.println(result.snd);
+    System.out.println(result.fst);
+  }
 
   private Pair<HeapGraph, CallGraph> analyzeFor(String theClass, String theMethod) throws IOException, ClassHierarchyException,
       CallGraphBuilderCancelException {

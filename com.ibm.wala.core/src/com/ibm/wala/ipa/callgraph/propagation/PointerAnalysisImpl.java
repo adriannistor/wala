@@ -15,6 +15,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import com.ibm.wala.classLoader.ArrayClass;
 import com.ibm.wala.classLoader.IClass;
 import com.ibm.wala.classLoader.IField;
 import com.ibm.wala.classLoader.Language;
@@ -137,10 +138,17 @@ public class PointerAnalysisImpl extends AbstractPointerAnalysis {
       OrdinalSet<InstanceKey> pointsTo = new OrdinalSet<InstanceKey>(S, instanceKeys);
       
       // handling symbolic instances
-      if(key instanceof InstanceFieldKey) { // TODO: make it work for ArrayFieldKey
+      if(key instanceof InstanceFieldKey) { 
         InstanceFieldKey ifk = (InstanceFieldKey) key;
         if(ifk.getInstanceKey() instanceof SymbolicTypeKey) {
           TypeReference fieldTypeReference = ifk.getField().getFieldTypeReference();
+          addSymbolicPointsTo(v, pointsTo, fieldTypeReference);
+        }
+      }
+      if(key instanceof ArrayContentsKey) {
+        ArrayContentsKey arrCont = (ArrayContentsKey) key;
+        if(arrCont.getInstanceKey() instanceof SymbolicTypeKey) {
+          TypeReference fieldTypeReference = ((ArrayClass)arrCont.getInstanceKey().getConcreteType()).getElementClass().getReference(); 
           addSymbolicPointsTo(v, pointsTo, fieldTypeReference);
         }
       }

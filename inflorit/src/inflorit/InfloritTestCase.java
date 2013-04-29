@@ -27,6 +27,7 @@ import com.ibm.wala.ipa.callgraph.AnalysisScope;
 import com.ibm.wala.ipa.callgraph.CGNode;
 import com.ibm.wala.ipa.callgraph.CallGraph;
 import com.ibm.wala.ipa.callgraph.CallGraphBuilder;
+import com.ibm.wala.ipa.callgraph.CallGraphBuilderCancelException;
 import com.ibm.wala.ipa.callgraph.Context;
 import com.ibm.wala.ipa.callgraph.ContextItem;
 import com.ibm.wala.ipa.callgraph.ContextKey;
@@ -66,6 +67,7 @@ import com.ibm.wala.types.Selector;
 import com.ibm.wala.types.TypeName;
 import com.ibm.wala.types.TypeReference;
 import com.ibm.wala.util.CancelException;
+import com.ibm.wala.util.collections.Pair;
 import com.ibm.wala.util.graph.Graph;
 import com.ibm.wala.util.graph.GraphPrint;
 import com.ibm.wala.util.graph.GraphSlicer;
@@ -268,9 +270,21 @@ public class InfloritTestCase extends WalaTestCase {
 
   @Test
   public void testCircle04() throws ClassHierarchyException, IllegalArgumentException, CancelException, IOException {
+    analyzeFor("Lparticle/Circle04", "analyzeMe()V");
+  }
+
+  @Test
+  public void testVisualize09Circle02_1() throws ClassHierarchyException, IllegalArgumentException, CancelException, IOException {
+    Pair<HeapGraph, CallGraph> result = analyzeFor("Lvisualize09/Circle02", "analyzeMe1()V");
+    System.out.println(result.snd);
+    System.out.println(result.fst);
+  }
+
+  private Pair<HeapGraph, CallGraph> analyzeFor(String theClass, String theMethod) throws IOException, ClassHierarchyException,
+      CallGraphBuilderCancelException {
     AnalysisScope scope = CallGraphTestUtil.makeJ2SEAnalysisScope("basic.txt", CallGraphTestUtil.REGRESSION_EXCLUSIONS);
     ClassHierarchy cha = ClassHierarchy.make(scope);
-    Iterable<Entrypoint> entrypoints = makeEntryPoint(scope, cha, "Lparticle/Circle04", "analyzeMe()V");
+    Iterable<Entrypoint> entrypoints = makeEntryPoint(scope, cha, theClass, theMethod);
 
     AnalysisOptions analysisOptions = CallGraphTestUtil.makeAnalysisOptions(scope, entrypoints);
     AnalysisCache analysisCache = new AnalysisCache();
@@ -298,8 +312,9 @@ public class InfloritTestCase extends WalaTestCase {
     // System.out.println(GraphPrint.genericToString(callGraph));
     // System.out.println(GraphPrint.genericToString(heapGraph));
 
-    IMethod analyzedMethod = TestUtils.getMethod_HelperHack(cha, "particle.Circle04", "analyzeMe");
+    IMethod analyzedMethod = TestUtils.getMethod_HelperHack(cha, theClass, theMethod);
     CGNode curMethodCGNode = TestUtils.getCGNodeONE_HelperHack(analyzedMethod, callGraph);
+    System.out.println(curMethodCGNode.getIR());
     Object theThisPointerKey = heapModel.getPointerKeyForLocal(curMethodCGNode, 1);
 
     System.out.println("YY: " + theThisPointerKey);
@@ -326,6 +341,7 @@ public class InfloritTestCase extends WalaTestCase {
       }
     }
     Assert.assertTrue("when called from Circle04, I should NOT find any pField!!!", !foundFiled);
+    return Pair.make(heapGraph, callGraph);
   }
 
 }

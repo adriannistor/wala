@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Set;
 
 import com.ibm.wala.analysis.reflection.IllegalArgumentExceptionContext;
+import com.ibm.wala.classLoader.ArrayClass;
 import com.ibm.wala.classLoader.CallSiteReference;
 import com.ibm.wala.classLoader.IClass;
 import com.ibm.wala.classLoader.IField;
@@ -838,6 +839,15 @@ public abstract class PropagationCallGraphBuilder implements CallGraphBuilder {
             return;
           }
           PointerKey p = getPointerKeyForArrayContents(I);
+          
+          if(p instanceof ArrayContentsKey) { // __ADI__C
+            ArrayContentsKey arrCont = (ArrayContentsKey) p;
+            if(arrCont.getInstanceKey() instanceof SymbolicTypeKey) {
+              TypeReference fieldTypeReference = ((ArrayClass)arrCont.getInstanceKey().getConcreteType()).getElementClass().getReference(); 
+              addForSymbolicType(p, fieldTypeReference);
+            }
+          }
+          
           if (p == null) {
             return;
           }
@@ -966,6 +976,19 @@ public abstract class PropagationCallGraphBuilder implements CallGraphBuilder {
     }
   }
 
+  private void addForSymbolicType(PointerKey p, TypeReference fieldTypeReference) {
+    Set<InstanceKey> symbolicInstances = instanceKeyFactory
+        .getInstancesKeyForSymbolicType(fieldTypeReference);
+//    Iterator<InstanceKey> iterator = symbolicInstances.iterator();
+//    for (int i = 0; i < 10000 /*Integer.parseInt(System.getProperty("SYMBOLIC_K")) */ && iterator.hasNext(); i++) {
+//      InstanceKey symbolicInstance = iterator.next();
+//      system.newConstraint(p, symbolicInstance);
+//    }
+    for (InstanceKey symbolicInstance : symbolicInstances) {
+      system.newConstraint(p, symbolicInstance);
+    }
+  }
+  
   /**
    * Binary op: <dummy>:= GetField( <ref>) Side effect: Creates new equations.
    */
@@ -1019,13 +1042,13 @@ public abstract class PropagationCallGraphBuilder implements CallGraphBuilder {
             if (p instanceof AbstractFieldPointerKey) { // TODO: make it work for ArrayFieldKey
               AbstractFieldPointerKey ifk = (AbstractFieldPointerKey) p;
               if (ifk.getInstanceKey() instanceof SymbolicTypeKey) {
-                addForSymbolicType(p);
+                addForSymbolicType(p, getField().getFieldTypeReference());
               }
             }
 
             if (true) // TODO: is symbolic analysis?
               if (p instanceof StaticFieldKey)
-                addForSymbolicType(p);
+                addForSymbolicType(p, getField().getFieldTypeReference());
 
             if (p != null) {
               if (DEBUG_GET) {
@@ -1034,19 +1057,6 @@ public abstract class PropagationCallGraphBuilder implements CallGraphBuilder {
               }
               sideEffect.b |= system.newFieldRead(dVal, assignOperator, p, object);
             }
-          }
-        }
-
-        private void addForSymbolicType(PointerKey p) {
-          Set<InstanceKey> symbolicInstances = instanceKeyFactory
-              .getInstancesKeyForSymbolicType(getField().getFieldTypeReference());
-//          Iterator<InstanceKey> iterator = symbolicInstances.iterator();
-//          for (int i = 0; i < 10000 /*Integer.parseInt(System.getProperty("SYMBOLIC_K")) */ && iterator.hasNext(); i++) {
-//            InstanceKey symbolicInstance = iterator.next();
-//            system.newConstraint(p, symbolicInstance);
-//          }
-          for (InstanceKey symbolicInstance : symbolicInstances) {
-            system.newConstraint(p, symbolicInstance);
           }
         }
       };
